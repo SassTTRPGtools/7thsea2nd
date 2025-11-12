@@ -2,7 +2,7 @@
   <div class="bg-stone-50 border-4 border-red-900 rounded-sm shadow-lg">
     <!-- 標題欄 -->
     <div class="bg-red-900 text-white text-center py-2 px-4">
-      <h2 class="text-lg font-bold uppercase tracking-wider">Skills</h2>
+      <h2 class="text-lg font-bold uppercase tracking-wider">技能</h2>
     </div>
     
     <!-- 內容區 -->
@@ -12,13 +12,22 @@
         <div 
           v-for="(skill, index) in skills" 
           :key="skill.key"
-          class="flex items-center justify-between"
+          class="flex items-center justify-between group"
         >
-          <span class="text-xs font-medium text-gray-800 w-20">{{ skill.name }}</span>
+          <div class="relative">
+            <span class="text-x font-medium text-gray-800 w-20 cursor-help">{{ skill.name }}</span>
+            <!-- 懸停提示框 -->
+            <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl z-50">
+              <div class="font-semibold mb-1">{{ skill.name }}</div>
+              <div class="text-gray-200">{{ skill.description }}</div>
+              <!-- 小三角形箭頭 -->
+              <div class="absolute top-full left-4 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+            </div>
+          </div>
           
           <div class="flex gap-0.5">
             <button
-              v-for="n in 6"
+              v-for="n in 5"
               :key="n - 1"
               @click="setSkillValue(skill.key, n - 1)"
               :class="[
@@ -35,9 +44,9 @@
 
       <!-- 技能說明 -->
       <div class="mt-4 pt-3 border-t border-gray-300 text-xs text-gray-600 space-y-1">
-        <p><strong>Rank 3:</strong> Re-Roll a single die</p>
-        <p><strong>Rank 4:</strong> Sets of 15 = 2 Raises</p>
-        <p><strong>Rank 5:</strong> 10s explode (+1 die)</p>
+        <p><strong>3 級:</strong> 從檢定骰池選擇一顆重骰</p>
+        <p><strong>4 級:</strong> 用結果組成 15 並獲得 2 勢頭</p>
+        <p><strong>5 級:</strong> 結果 10 視為爆炸骰 (額外擲一顆骰子)</p>
       </div>
     </div>
   </div>
