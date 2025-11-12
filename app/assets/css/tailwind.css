@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code&display=swap');
+
+/* 鮮明色彩主題 */
+body {
+	@apply bg-magnus-bg text-magnus-text font-typewriter;
+}
+
+.magnus-paper {
+	@apply bg-magnus-paper text-magnus-text shadow-lg rounded-lg p-4;
+	border: 1px solid theme('colors.magnus.faded');
+}
+
+.magnus-accent {
+	@apply text-magnus-accent;
+}
+
+/* A4列印樣式 */
+@page {
+  size: A4;
+  margin: 0.5in;
+}
+
+/* 確保列印時的正確樣式 */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .print\\:hidden {
+    display: none !important;
+  }
+}

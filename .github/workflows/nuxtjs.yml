@@ -1,0 +1,169 @@
+# Sample workflow for building and deploying a Nuxt site to GitHub Pages
+#
+# To get started with Nuxt see: https://nuxtjs.org/docs/get-started/installation
+#
+name: Deploy Nuxt site to Pages
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+      - name: Debug working directory
+        run: |
+          echo "Current working directory:"
+          pwd
+          echo "Directory contents:"
+          ls -la
+          echo "app directory contents:"
+          if [ -d "app" ]; then
+            ls -la app/
+          else
+            echo "app directory not found!"
+          fi
+          echo "app/stores directory contents:"
+          if [ -d "app/stores" ]; then
+            ls -la app/stores/
+            echo "Checking achtungCthulhuStore.js exists:"
+            if [ -f "app/stores/achtungCthulhuStore.js" ]; then
+              echo "✓ achtungCthulhuStore.js found"
+              echo "First 5 lines of achtungCthulhuStore.js:"
+              head -5 app/stores/achtungCthulhuStore.js
+            else
+              echo "✗ achtungCthulhuStore.js NOT found"
+            fi
+            echo "Checking cohorsCthvlhvStore.js exists:"
+            if [ -f "app/stores/cohorsCthvlhvStore.js" ]; then
+              echo "✓ cohorsCthvlhvStore.js found"
+            else
+              echo "✗ cohorsCthvlhvStore.js NOT found"
+            fi
+          else
+            echo "app/stores directory not found!"
+          fi
+          echo "app/composables directory contents:"
+          if [ -d "app/composables" ]; then
+            ls -la app/composables/
+            echo "Checking useFVTTExport.js exists:"
+            if [ -f "app/composables/useFVTTExport.js" ]; then
+              echo "✓ useFVTTExport.js found"
+              echo "First 3 lines of useFVTTExport.js:"
+              head -3 app/composables/useFVTTExport.js
+            else
+              echo "✗ useFVTTExport.js NOT found"
+            fi
+          else
+            echo "app/composables directory not found!"
+          fi
+          echo "app/data directory contents:"
+          if [ -d "app/data" ]; then
+            ls -la app/data/
+            echo "Checking data files:"
+            for file in archetypesAC.js backgroundsAC.js traitsAC.js; do
+              if [ -f "app/data/$file" ]; then
+                echo "✓ $file found"
+              else
+                echo "✗ $file NOT found"
+              fi
+            done
+          else
+            echo "app/data directory not found!"
+          fi
+          echo "Checking nuxt.config.ts:"
+          if [ -f "nuxt.config.ts" ]; then
+            echo "✓ nuxt.config.ts found"
+            echo "nuxt.config.ts content:"
+            cat nuxt.config.ts
+          else
+            echo "✗ nuxt.config.ts NOT found"
+          fi
+      - name: Generate Nuxt
+        run: |
+          echo "Generating Nuxt project for static deployment..."
+          npm run generate
+          
+          echo "Checking generated output..."
+          echo "Output directory contents:"
+          ls -la .output/public/
+          
+          echo "Checking _nuxt directory:"
+          if [ -d ".output/public/_nuxt" ]; then
+            ls -la .output/public/_nuxt/
+          else
+            echo "ERROR: _nuxt directory not found!"
+            exit 1
+          fi
+          
+          echo "Verifying important files:"
+          if [ -f ".output/public/index.html" ]; then
+            echo "✓ index.html exists"
+            echo "index.html content:"
+            head -20 .output/public/index.html
+          else
+            echo "ERROR: index.html not found!"
+            exit 1
+          fi
+          
+          echo "Checking for JavaScript files:"
+          JS_FILES=$(find .output/public/_nuxt -name "*.js" | wc -l)
+          echo "Found $JS_FILES JavaScript files"
+          
+          echo "Checking for CSS files:"
+          CSS_FILES=$(find .output/public/_nuxt -name "*.css" | wc -l)
+          echo "Found $CSS_FILES CSS files"
+          
+          if [ $JS_FILES -eq 0 ]; then
+            echo "ERROR: No JavaScript files found!"
+            exit 1
+          fi
+          
+          echo "All files generated successfully!"
+          echo "Final file count:"
+          find .output/public -type f | wc -l
+      - name: Add .nojekyll
+        run: |
+          touch .output/public/.nojekyll
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .output/public
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
