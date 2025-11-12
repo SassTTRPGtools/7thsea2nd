@@ -5,3 +5,5 @@
 export * from './traits';
 export * from './skills';
 export * from './nations';
+export * from './advantages';
+export * from './arcanas';

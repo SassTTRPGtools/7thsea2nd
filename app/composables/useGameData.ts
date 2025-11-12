@@ -7,9 +7,19 @@ import {
   traits, 
   skills, 
   nations,
+  advantages,
+  arcanas,
   type Trait, 
   type Skill,
-  type Nation 
+  type Nation,
+  type Advantage,
+  type Arcana,
+  type Virtue,
+  type Hubris,
+  getAdvantagesByCost,
+  getAdvantageActualCost,
+  getVirtues,
+  getHubris
 } from '~/data';
 
 export const useGameData = () => {
@@ -83,22 +93,104 @@ export const useGameData = () => {
     return nations[nationKey]?.traitBonuses || [];
   };
 
+  /**
+   * 取得所有優勢
+   */
+  const getAllAdvantages = (): Advantage[] => {
+    return Object.values(advantages);
+  };
+
+  /**
+   * 根據 key 取得優勢
+   */
+  const getAdvantageByKey = (key: string): Advantage | undefined => {
+    return advantages[key];
+  };
+
+  /**
+   * 根據成本取得優勢列表
+   */
+  const getAdvantagesByPointCost = (cost: number): Advantage[] => {
+    return getAdvantagesByCost(cost);
+  };
+
+  /**
+   * 取得優勢的實際成本（考慮國籍減免）
+   */
+  const getActualAdvantageCost = (advantageKey: string, nationKey?: string): number => {
+    return getAdvantageActualCost(advantageKey, nationKey);
+  };
+
+  /**
+   * 取得優勢中文名稱
+   */
+  const getAdvantageName = (key: string): string => {
+    return advantages[key]?.name || key;
+  };
+
+  /**
+   * 取得所有阿爾克那
+   */
+  const getAllArcanas = (): Arcana[] => {
+    return Object.values(arcanas);
+  };
+
+  /**
+   * 根據 key 取得阿爾克那
+   */
+  const getArcanaByKey = (key: string): Arcana | undefined => {
+    return arcanas[key];
+  };
+
+  /**
+   * 取得所有美德
+   */
+  const getAllVirtues = (): Virtue[] => {
+    return getVirtues();
+  };
+
+  /**
+   * 取得所有傲性
+   */
+  const getAllHubris = (): Hubris[] => {
+    return getHubris();
+  };
+
+  /**
+   * 取得阿爾克那中文名稱
+   */
+  const getArcanaName = (key: string): string => {
+    return arcanas[key]?.name || key;
+  };
+
   return {
     // 資料
     traits,
     skills,
     nations,
+    advantages,
+    arcanas,
     
     // 方法
     getAllTraits,
     getAllSkills,
     getAllNations,
+    getAllAdvantages,
+    getAllArcanas,
+    getAllVirtues,
+    getAllHubris,
     getTraitByKey,
     getSkillByKey,
     getNationByKey,
+    getAdvantageByKey,
+    getArcanaByKey,
     getTraitName,
     getSkillName,
     getNationName,
-    getNationTraitBonuses
+    getAdvantageName,
+    getArcanaName,
+    getNationTraitBonuses,
+    getAdvantagesByPointCost,
+    getActualAdvantageCost
   };
 };
