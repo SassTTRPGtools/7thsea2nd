@@ -1,50 +1,53 @@
 <template>
-  <div class="character-sheet-container">
+  <div class="min-h-screen relative bg-gradient-to-br from-stone-200 via-stone-100 to-stone-300">
     <!-- 背景圖片 -->
-    <div class="sheet-background" 
+    <div class="fixed inset-0 opacity-10 bg-cover bg-center pointer-events-none"
          :style="{ backgroundImage: `url(/sheet_background.jpg)` }">
     </div>
 
-    <!-- Logo -->
-    <div class="logo-container">
-      <img src="/logo.png" alt="7th Sea Logo" class="logo" />
-    </div>
-
-    <!-- 角色表內容 -->
-    <div class="character-sheet-content">
-      <div class="sheet-grid">
-        <!-- 第一欄 -->
-        <div class="sheet-column">
-          <CharacterInfo />
-          <TraitsSection />
-          <SkillsSection />
-        </div>
-
-        <!-- 第二欄 -->
-        <div class="sheet-column">
-          <ArcanaSection />
-          <BackgroundsSection />
-          <AdvantagesSection />
-        </div>
-
-        <!-- 第三欄 -->
-        <div class="sheet-column">
-          <StoriesSection />
-          <DeathSpiralSection />
+    <!-- 主要內容 -->
+    <div class="relative z-10 max-w-[1600px] mx-auto p-4 md:p-8">
+      <!-- 頂部 Logo 和操作按鈕 -->
+      <div class="flex justify-between items-center mb-6">
+        <img src="/logo.png" alt="7th Sea" class="h-16 md:h-20 drop-shadow-lg opacity-80" />
+        
+        <div class="flex gap-2 md:gap-3">
+          <button @click="exportCharacter" 
+                  class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded shadow-md transition-all text-sm md:text-base font-semibold">
+            匯出
+          </button>
+          <button @click="importCharacter" 
+                  class="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-white rounded shadow-md transition-all text-sm md:text-base font-semibold">
+            匯入
+          </button>
+          <button @click="resetCharacter" 
+                  class="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded shadow-md transition-all text-sm md:text-base font-semibold">
+            重置
+          </button>
         </div>
       </div>
 
-      <!-- 操作按鈕 -->
-      <div class="action-buttons">
-        <button @click="exportCharacter" class="btn-export">
-          匯出角色
-        </button>
-        <button @click="importCharacter" class="btn-import">
-          匯入角色
-        </button>
-        <button @click="resetCharacter" class="btn-reset">
-          重置角色
-        </button>
+      <!-- 三欄佈局 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+        <!-- 左欄 -->
+        <div class="space-y-4 md:space-y-6">
+          <CharacterInfo />
+          <ArcanaSection />
+          <StoriesSection />
+        </div>
+
+        <!-- 中欄 -->
+        <div class="space-y-4 md:space-y-6">
+          <TraitsSection />
+          <SkillsSection />
+          <DeathSpiralSection />
+        </div>
+
+        <!-- 右欄 -->
+        <div class="space-y-4 md:space-y-6">
+          <BackgroundsSection />
+          <AdvantagesSection />
+        </div>
       </div>
     </div>
   </div>
@@ -97,138 +100,3 @@ const resetCharacter = () => {
 };
 </script>
 
-<style scoped>
-.character-sheet-container {
-  position: relative;
-  min-height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
-}
-
-.sheet-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.15;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.logo-container {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 10;
-}
-
-.logo {
-  width: 120px;
-  height: auto;
-  opacity: 0.8;
-  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
-}
-
-.character-sheet-content {
-  position: relative;
-  z-index: 1;
-  max-width: 1800px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-
-.sheet-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.sheet-column {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 32px;
-  padding: 20px;
-  background: rgba(43, 31, 23, 0.8);
-  border-radius: 8px;
-  border: 2px solid #8b7355;
-}
-
-.action-buttons button {
-  padding: 12px 32px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.3s;
-  border: 2px solid;
-}
-
-.btn-export {
-  background: #4a7c59;
-  color: #f5e6d3;
-  border-color: #5a9c6d;
-}
-
-.btn-export:hover {
-  background: #5a9c6d;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(74, 124, 89, 0.4);
-}
-
-.btn-import {
-  background: #6b5d99;
-  color: #f5e6d3;
-  border-color: #8b7db9;
-}
-
-.btn-import:hover {
-  background: #8b7db9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(107, 93, 153, 0.4);
-}
-
-.btn-reset {
-  background: #b84c4c;
-  color: #f5e6d3;
-  border-color: #d86c6c;
-}
-
-.btn-reset:hover {
-  background: #d86c6c;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(184, 76, 76, 0.4);
-}
-
-/* 響應式設計 */
-@media (max-width: 1400px) {
-  .sheet-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 900px) {
-  .sheet-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .logo {
-    width: 80px;
-  }
-  
-  .action-buttons {
-    flex-direction: column;
-  }
-}
-</style>

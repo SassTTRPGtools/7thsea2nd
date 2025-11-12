@@ -1,40 +1,43 @@
 <template>
-  <div class="advantages-section">
-    <h2 class="section-title">優勢 (Advantages)</h2>
+  <div class="bg-stone-50 border-4 border-red-900 rounded-sm shadow-lg">
+    <div class="bg-red-900 text-white text-center py-2 px-4">
+      <h2 class="text-lg font-bold uppercase tracking-wider">Advantages</h2>
+    </div>
     
-    <div class="selected-advantages">
-      <h3 class="subsection-title">已選優勢</h3>
-      <div v-if="characterStore.advantages.length > 0" class="advantage-list">
-        <div v-for="(advKey, index) in characterStore.advantages" :key="index" class="advantage-item">
-          <div class="advantage-info">
-            <strong>{{ getAdvantageName(advKey) }}</strong>
-            <span class="advantage-cost">{{ getAdvantageCost(advKey) }} 點</span>
+    <div class="p-4">
+      <div v-if="characterStore.advantages.length > 0" class="space-y-2 mb-3">
+        <div v-for="(advKey, index) in characterStore.advantages" :key="index" 
+             class="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-200">
+          <div class="flex-1">
+            <div class="text-sm font-semibold text-gray-800">{{ getAdvantageName(advKey) }}</div>
+            <div class="text-xs text-gray-600">{{ getAdvantageCost(advKey) }} 點</div>
           </div>
-          <button @click="removeAdvantage(advKey)" class="btn-remove">✕</button>
+          <button @click="removeAdvantage(advKey)" 
+                  class="px-2 py-1 bg-red-700 hover:bg-red-600 text-white rounded text-xs">
+            ✕
+          </button>
         </div>
-        <div class="total-cost">
-          總成本: <strong>{{ totalCost }}</strong> 點
+        <div class="text-center py-2 bg-amber-50 border border-amber-300 rounded font-semibold text-sm">
+          總成本: {{ totalCost }} 點
         </div>
       </div>
-      <div v-else class="empty-state">
+      <div v-else class="text-center py-4 text-gray-500 text-sm italic">
         尚未選擇優勢
       </div>
+      <button @click="showSelector = true" 
+              class="w-full py-2 bg-red-900 hover:bg-red-800 text-white rounded text-sm font-semibold">
+        + 選擇優勢
+      </button>
     </div>
 
-    <button @click="showSelector = true" class="btn-add-advantage">
-      + 選擇優勢
-    </button>
-
-    <!-- 優勢選擇器 Modal -->
-    <div v-if="showSelector" class="modal-overlay" @click="showSelector = false">
-      <div class="modal-content" @click.stop>
-        <h3>選擇優勢</h3>
-        
-        <!-- 成本篩選 -->
-        <div class="filter-section">
-          <label>篩選成本:</label>
-          <select v-model="filterCost" class="filter-select">
-            <option value="all">全部</option>
+    <div v-if="showSelector" @click="showSelector = false"
+         class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+      <div @click.stop class="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-y-auto">
+        <div class="bg-red-900 text-white px-6 py-4 sticky top-0 z-10">
+          <h3 class="text-xl font-bold">選擇優勢</h3>
+          <select v-model="filterCost" 
+                  class="mt-2 px-3 py-1 bg-white text-gray-800 rounded text-sm font-semibold">
+            <option value="all">全部成本</option>
             <option value="1">1 點</option>
             <option value="2">2 點</option>
             <option value="3">3 點</option>
@@ -42,28 +45,37 @@
             <option value="5">5 點</option>
           </select>
         </div>
-
-        <div class="advantages-grid">
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-3">
           <button
             v-for="adv in filteredAdvantages"
             :key="adv.key"
             @click="addAdvantage(adv.key)"
             :disabled="characterStore.advantages.includes(adv.key)"
-            class="advantage-card"
-            :class="{ 'selected': characterStore.advantages.includes(adv.key) }"
+            :class="[
+              'text-left p-4 border-2 rounded-lg transition-all',
+              characterStore.advantages.includes(adv.key)
+                ? 'bg-gray-100 border-gray-300 opacity-50 cursor-not-allowed'
+                : 'bg-white border-red-200 hover:border-red-500 hover:shadow-md'
+            ]"
           >
-            <div class="advantage-header">
-              <strong>{{ adv.name }}</strong>
-              <span class="cost-badge">{{ getAdvantageCost(adv.key) }}</span>
+            <div class="flex justify-between items-start mb-2">
+              <div class="font-bold text-gray-800 text-sm">{{ adv.name }}</div>
+              <div class="px-2 py-1 bg-amber-400 text-amber-900 rounded-full text-xs font-bold">
+                {{ getAdvantageCost(adv.key) }}
+              </div>
             </div>
-            <p class="advantage-desc">{{ adv.description }}</p>
-            <div v-if="hasDiscount(adv)" class="discount-info">
+            <div class="text-xs text-gray-600 leading-relaxed">{{ adv.description }}</div>
+            <div v-if="hasDiscount(adv)" class="mt-2 text-xs text-green-700 font-semibold">
               🎯 國籍折扣
             </div>
           </button>
         </div>
-
-        <button @click="showSelector = false" class="btn-close">關閉</button>
+        <div class="p-4 border-t sticky bottom-0 bg-white">
+          <button @click="showSelector = false" 
+                  class="w-full py-2 bg-gray-600 hover:bg-gray-700 text-white rounded font-semibold">
+            關閉
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -81,14 +93,9 @@ const showSelector = ref(false);
 const filterCost = ref<string>('all');
 
 const filteredAdvantages = computed(() => {
-  if (filterCost.value === 'all') {
-    return advantages;
-  }
+  if (filterCost.value === 'all') return advantages;
   const cost = parseInt(filterCost.value);
-  return advantages.filter(adv => {
-    const actualCost = getActualAdvantageCost(adv.key, characterStore.nation);
-    return actualCost === cost;
-  });
+  return advantages.filter(adv => getActualAdvantageCost(adv.key, characterStore.nation) === cost);
 });
 
 const getAdvantageName = (key: string) => {
@@ -100,9 +107,8 @@ const getAdvantageCost = (key: string) => {
 };
 
 const totalCost = computed(() => {
-  return characterStore.advantages.reduce((sum, key) => {
-    return sum + getActualAdvantageCost(key, characterStore.nation);
-  }, 0);
+  return characterStore.advantages.reduce((sum, key) => 
+    sum + getActualAdvantageCost(key, characterStore.nation), 0);
 });
 
 const hasDiscount = (adv: any) => {
@@ -120,261 +126,3 @@ const removeAdvantage = (key: string) => {
   characterStore.removeAdvantage(key);
 };
 </script>
-
-<style scoped>
-.advantages-section {
-  background: rgba(43, 31, 23, 0.9);
-  border: 2px solid #8b7355;
-  border-radius: 8px;
-  padding: 20px;
-}
-
-.section-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #f5e6d3;
-  margin-bottom: 16px;
-  text-align: center;
-  border-bottom: 2px solid #8b7355;
-  padding-bottom: 8px;
-}
-
-.subsection-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #d4af37;
-  margin-bottom: 10px;
-}
-
-.selected-advantages {
-  margin-bottom: 16px;
-}
-
-.advantage-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.advantage-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(245, 230, 211, 0.1);
-  border: 1px solid #8b7355;
-  border-radius: 4px;
-  padding: 10px 12px;
-}
-
-.advantage-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.advantage-info strong {
-  color: #f5e6d3;
-  font-size: 14px;
-}
-
-.advantage-cost {
-  color: #d4af37;
-  font-size: 12px;
-}
-
-.total-cost {
-  background: rgba(212, 175, 55, 0.2);
-  border: 1px solid #d4af37;
-  border-radius: 4px;
-  padding: 10px;
-  text-align: center;
-  color: #f5e6d3;
-  font-size: 16px;
-  margin-top: 8px;
-}
-
-.total-cost strong {
-  color: #d4af37;
-  font-size: 18px;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 20px;
-  color: #c9b895;
-  font-style: italic;
-}
-
-.btn-remove {
-  padding: 6px 12px;
-  background: #b84c4c;
-  color: #f5e6d3;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s;
-}
-
-.btn-remove:hover {
-  background: #d86c6c;
-}
-
-.btn-add-advantage {
-  width: 100%;
-  padding: 12px;
-  background: #4a7c59;
-  color: #f5e6d3;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 16px;
-  transition: background 0.3s;
-}
-
-.btn-add-advantage:hover {
-  background: #5a9c6d;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: #2b1f17;
-  border: 2px solid #8b7355;
-  border-radius: 8px;
-  padding: 24px;
-  max-width: 900px;
-  max-height: 85vh;
-  overflow-y: auto;
-  color: #f5e6d3;
-  width: 90%;
-}
-
-.modal-content h3 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #d4af37;
-  font-size: 22px;
-}
-
-.filter-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding: 12px;
-  background: rgba(245, 230, 211, 0.1);
-  border-radius: 4px;
-}
-
-.filter-section label {
-  font-weight: 600;
-  color: #d4af37;
-}
-
-.filter-select {
-  padding: 8px 12px;
-  background: rgba(245, 230, 211, 0.95);
-  border: 1px solid #8b7355;
-  border-radius: 4px;
-  color: #2b1f17;
-  font-weight: 600;
-}
-
-.advantages-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.advantage-card {
-  background: rgba(245, 230, 211, 0.05);
-  border: 2px solid #8b7355;
-  border-radius: 6px;
-  padding: 12px;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.advantage-card:hover:not(:disabled) {
-  background: rgba(212, 175, 55, 0.2);
-  border-color: #d4af37;
-  transform: translateY(-2px);
-}
-
-.advantage-card.selected {
-  background: rgba(74, 124, 89, 0.3);
-  border-color: #5a9c6d;
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.advantage-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.advantage-header strong {
-  color: #f5e6d3;
-  font-size: 14px;
-}
-
-.cost-badge {
-  background: #d4af37;
-  color: #2b1f17;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.advantage-desc {
-  margin: 0;
-  font-size: 12px;
-  color: #c9b895;
-  line-height: 1.4;
-}
-
-.discount-info {
-  margin-top: 8px;
-  padding: 6px;
-  background: rgba(74, 124, 89, 0.3);
-  border-radius: 4px;
-  font-size: 11px;
-  color: #5a9c6d;
-  font-weight: 600;
-}
-
-.btn-close {
-  width: 100%;
-  padding: 12px;
-  background: #6b5d99;
-  color: #f5e6d3;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s;
-}
-
-.btn-close:hover {
-  background: #8b7db9;
-}
-</style>

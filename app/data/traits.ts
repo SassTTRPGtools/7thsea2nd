@@ -13,27 +13,27 @@ export const traits: Record<string, Trait> = {
   brawn: {
     key: 'brawn',
     name: '體魄',
-    description: '代表英雄的力量與體能。'
+    description: '代表力量與體能。'
   },
   finesse: {
     key: 'finesse',
     name: '靈巧',
-    description: '衡量英雄的協調與敏捷。'
+    description: '代表協調與敏捷。'
   },
   resolve: {
     key: 'resolve',
     name: '堅毅',
-    description: '代表英雄的意志力與耐力。'
+    description: '代表意志力與耐力。'
   },
   wits: {
     key: 'wits',
     name: '機智',
-    description: '衡量英雄臨機應變的反應速度。'
+    description: '衡量臨機應變的反應速度。'
   },
   panache: {
     key: 'panache',
     name: '風采',
-    description: '代表英雄的魅力與個人風格。'
+    description: '代表魅力與個人吸引力。'
   }
 };
 
