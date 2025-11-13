@@ -431,10 +431,143 @@
           <p class="text-gray-700 mb-4">
             你有 <span class="font-bold text-red-700">5 點</span>可購買新的優勢。你只能購買你符合資格的優勢。
           </p>
-          <p class="text-sm text-gray-600 mb-6">
-            剩餘點數: <span class="font-bold text-lg">{{ creation.availableAdvantagePoints.value }}</span>
+
+          <!-- 背景優勢說明 -->
+          <div v-if="creation.backgroundAdvantages.value.length > 0" class="mb-6 p-4 bg-green-50 border-2 border-green-400 rounded-lg">
+            <h3 class="font-bold text-green-900 mb-2 flex items-center gap-2">
+              <span class="text-xl">🎁</span> 
+              背景優勢（免費獲得）
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="advKey in creation.backgroundAdvantages.value"
+                :key="advKey"
+                class="px-3 py-1 bg-green-600 text-white rounded-lg text-sm font-semibold"
+              >
+                {{ getAdvantageName(advKey) }}
+              </span>
+            </div>
+            <p class="text-xs text-green-800 mt-2">
+              💡 提示：背景優勢是免費的，不會消耗你的 5 點購買額度。
+            </p>
+          </div>
+
+          <!-- 已購買優勢 -->
+          <div v-if="purchasedAdvantages.length > 0" class="mb-6">
+            <h3 class="font-semibold mb-2">已購買的優勢:</h3>
+            <div class="flex flex-wrap gap-2">
+              <div
+                v-for="adv in purchasedAdvantages"
+                :key="adv.key"
+                class="px-4 py-2 bg-red-700 text-white rounded-lg flex items-center gap-2"
+              >
+                <span>{{ adv.name }} ({{ getAdvantageActualCost(adv.key) }} 點)</span>
+                <button
+                  @click="removeAdvantage(adv.key)"
+                  class="text-white hover:text-red-200 font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-sm text-gray-600 mb-4">
+            剩餘點數: <span class="font-bold text-lg" :class="creation.availableAdvantagePoints.value === 0 ? 'text-green-700' : 'text-red-700'">
+              {{ creation.availableAdvantagePoints.value }}
+            </span>
           </p>
-          <p class="text-center text-gray-500 py-20">優勢購買功能開發中...</p>
+
+          <!-- 成本篩選器 -->
+          <div class="mb-6 flex items-center gap-3">
+            <span class="font-semibold text-gray-700">篩選成本:</span>
+            <div class="flex gap-2">
+              <button
+                v-for="cost in [1, 2, 3, 4, 5]"
+                :key="cost"
+                @click="selectedCostFilter = selectedCostFilter === cost ? null : cost"
+                :class="[
+                  'px-4 py-2 rounded-lg font-semibold transition-all',
+                  selectedCostFilter === cost
+                    ? 'bg-red-700 text-white'
+                    : 'bg-stone-200 text-gray-700 hover:bg-stone-300'
+                ]"
+              >
+                {{ cost }} 點
+              </button>
+              <button
+                v-if="selectedCostFilter !== null"
+                @click="selectedCostFilter = null"
+                class="px-4 py-2 bg-stone-400 text-white rounded-lg hover:bg-stone-500"
+              >
+                顯示全部
+              </button>
+            </div>
+          </div>
+
+          <!-- 優勢列表 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2">
+            <div
+              v-for="advantage in filteredAdvantages"
+              :key="advantage.key"
+              :class="[
+                'p-4 border-2 rounded-lg transition-all',
+                isBackgroundAdvantage(advantage.key)
+                  ? 'border-gray-300 bg-gray-100 opacity-60'
+                  : canPurchaseAdvantage(advantage.key)
+                  ? 'border-stone-300 hover:border-red-500 cursor-pointer hover:shadow-md'
+                  : 'border-stone-200 bg-stone-50 opacity-40 cursor-not-allowed'
+              ]"
+              @click="!isBackgroundAdvantage(advantage.key) && canPurchaseAdvantage(advantage.key) && purchaseAdvantage(advantage.key)"
+            >
+              <!-- 優勢標題 -->
+              <div class="flex justify-between items-start mb-2">
+                <div class="flex-1">
+                  <h3 class="font-bold text-lg flex items-center gap-2">
+                    {{ advantage.name }}
+                    <span v-if="advantage.isHeroPoint" class="text-yellow-600 text-sm" title="需要消耗英雄點啟用">★</span>
+                    <span v-if="advantage.isPersonal" class="text-blue-600 text-sm" title="個人特質">👤</span>
+                  </h3>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                  <span class="px-3 py-1 bg-red-700 text-white rounded-lg font-bold text-sm">
+                    {{ getAdvantageActualCost(advantage.key) }} 點
+                  </span>
+                  <span v-if="getAdvantageActualCost(advantage.key) < advantage.cost" class="text-xs text-green-700 font-semibold">
+                    原價 {{ advantage.cost }} 點
+                  </span>
+                </div>
+              </div>
+
+              <!-- 優勢說明 -->
+              <p class="text-sm text-gray-700 mb-2 leading-relaxed">{{ advantage.description }}</p>
+
+              <!-- 背景優勢標記 -->
+              <div v-if="isBackgroundAdvantage(advantage.key)" class="mt-2 text-xs font-semibold text-gray-600 bg-gray-200 px-2 py-1 rounded">
+                ✓ 已從背景獲得
+              </div>
+
+              <!-- 折扣說明 -->
+              <div v-else-if="advantage.conditionalCost && hasDiscount(advantage)" class="mt-2 text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded">
+                💰 {{ getDiscountReason(advantage) }}
+              </div>
+
+              <!-- 點數不足提示 -->
+              <div v-else-if="!canPurchaseAdvantage(advantage.key) && !characterStore.advantages.find(a => a.key === advantage.key)" class="mt-2 text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded">
+                ⚠️ 點數不足
+              </div>
+            </div>
+          </div>
+
+          <!-- 優勢說明 -->
+          <div class="mt-6 p-4 bg-stone-100 rounded-lg border-2 border-stone-300">
+            <h4 class="font-bold text-sm text-red-900 mb-2">優勢圖示說明</h4>
+            <div class="text-xs text-gray-700 space-y-1">
+              <p><strong>★</strong> 需要消耗英雄點才能啟用此優勢的效果</p>
+              <p><strong>👤</strong> 個人特質優勢（通常影響角色的基本屬性或外觀）</p>
+              <p><strong>💰 折扣</strong> 某些優勢對特定國家出身的角色有成本減免</p>
+            </div>
+          </div>
         </div>
 
         <!-- 步驟 6: 選擇阿爾克那 -->
@@ -475,7 +608,7 @@ import { useCharacterCreation } from '~/composables/useCharacterCreation';
 import { getNations, type Nation } from '~/data/nations';
 import { getBackgrounds, type Background, categoryNames } from '~/data/backgrounds';
 import { skills, getSkills } from '~/data/skills';
-import { advantages } from '~/data/advantages';
+import { advantages, getAdvantages, getAdvantageActualCost as getActualCost, type Advantage } from '~/data/advantages';
 
 const characterStore = useCharacterStore();
 const creation = useCharacterCreation();
@@ -486,6 +619,28 @@ const stepTitles = ['國家', '屬性', '背景', '技能', '優勢', '阿爾克
 const nations = getNations();
 const allBackgrounds = getBackgrounds();
 const allSkills = getSkills();
+const allAdvantages = getAdvantages();
+
+// 步驟 5: 優勢購買
+const selectedCostFilter = ref<number | null>(null);
+
+// 已購買的優勢（排除背景優勢）
+const purchasedAdvantages = computed(() => {
+  return characterStore.advantages.filter(adv => 
+    !creation.backgroundAdvantages.value.includes(adv.key)
+  );
+});
+
+// 根據成本篩選優勢
+const filteredAdvantages = computed(() => {
+  if (selectedCostFilter.value === null) {
+    return allAdvantages;
+  }
+  return allAdvantages.filter(adv => {
+    const actualCost = getActualCost(adv.key, characterStore.nation);
+    return actualCost === selectedCostFilter.value;
+  });
+});
 
 // 根據所選國家篩選背景
 const backgrounds = computed(() => {
@@ -567,6 +722,57 @@ const getAdvantageCost = (advantageKey: string): number => {
 
 const getAdvantageDescription = (advantageKey: string): string => {
   return advantages[advantageKey]?.description || '';
+};
+
+const getAdvantageActualCost = (advantageKey: string): number => {
+  return getActualCost(advantageKey, characterStore.nation);
+};
+
+const isBackgroundAdvantage = (advantageKey: string): boolean => {
+  return creation.backgroundAdvantages.value.includes(advantageKey);
+};
+
+const canPurchaseAdvantage = (advantageKey: string): boolean => {
+  // 如果是背景優勢，不能購買
+  if (isBackgroundAdvantage(advantageKey)) {
+    return false;
+  }
+  
+  // 如果已經擁有，不能再購買
+  if (characterStore.advantages.find(a => a.key === advantageKey)) {
+    return false;
+  }
+  
+  // 檢查點數是否足夠
+  const cost = getAdvantageActualCost(advantageKey);
+  return cost <= creation.availableAdvantagePoints.value;
+};
+
+const purchaseAdvantage = (advantageKey: string) => {
+  if (!canPurchaseAdvantage(advantageKey)) return;
+  
+  const advantage = advantages[advantageKey];
+  if (advantage) {
+    characterStore.addAdvantage(advantageKey, advantage.name);
+  }
+};
+
+const removeAdvantage = (advantageKey: string) => {
+  const index = characterStore.advantages.findIndex(a => a.key === advantageKey);
+  if (index !== -1 && !isBackgroundAdvantage(advantageKey)) {
+    characterStore.removeAdvantage(index);
+  }
+};
+
+const hasDiscount = (advantage: Advantage): boolean => {
+  if (!advantage.conditionalCost || !characterStore.nation) return false;
+  return advantage.conditionalCost.some(cond => cond.nation === characterStore.nation);
+};
+
+const getDiscountReason = (advantage: Advantage): string => {
+  if (!advantage.conditionalCost || !characterStore.nation) return '';
+  const discount = advantage.conditionalCost.find(cond => cond.nation === characterStore.nation);
+  return discount?.condition || '';
 };
 
 const isBackgroundSkill = (skillKey: string): boolean => {

@@ -91,10 +91,16 @@ export const useCharacterCreation = () => {
   /**
    * 步驟 5: 優勢購買
    * 有 5 點可購買優勢，只能購買符合資格的優勢
+   * 背景優勢不計入消耗點數
    */
   const spentAdvantagePoints = computed(() => {
     let total = 0;
     characterStore.advantages.forEach(adv => {
+      // 背景優勢不計入消耗點數
+      if (backgroundAdvantages.value.includes(adv.key)) {
+        return;
+      }
+      
       const advantage = getAdvantageByKey(adv.key);
       if (advantage) {
         // 檢查是否有條件性折扣
