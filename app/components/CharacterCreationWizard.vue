@@ -322,30 +322,122 @@
           </div>
         </div>
 
-        <!-- 步驟 4-6: 占位符 -->
+        <!-- 步驟 4: 技能分配 -->
         <div v-else-if="currentStep === 4">
           <h2 class="text-xl font-bold mb-4 text-red-900">步驟 4: 技能分配</h2>
           <p class="text-gray-700 mb-4">
             你有 <span class="font-bold text-red-700">10 點</span>技能點數可用來提升背景技能，並加入非背景技能。
             創角時，任何技能都不能高於等級 3。
           </p>
+
+          <!-- 背景技能說明 -->
+          <div v-if="creation.backgroundSkills.value.length > 0" class="mb-6 p-4 bg-blue-50 border-2 border-blue-400 rounded-lg">
+            <h3 class="font-bold text-blue-900 mb-2 flex items-center gap-2">
+              <span class="text-xl">📚</span> 
+              背景技能（已自動設為 1 級）
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="skillKey in creation.backgroundSkills.value"
+                :key="skillKey"
+                class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm font-semibold"
+              >
+                {{ getSkillName(skillKey) }}
+              </span>
+            </div>
+            <p class="text-xs text-blue-800 mt-2">
+              💡 提示：背景技能的第一級是免費的，提升到 2 級或 3 級才會消耗點數。
+            </p>
+          </div>
+
           <p class="text-sm text-gray-600 mb-6">
-            剩餘點數: <span class="font-bold text-lg">{{ creation.availableSkillPoints }}</span>
+            剩餘點數: <span class="font-bold text-lg" :class="creation.availableSkillPoints.value === 0 ? 'text-green-700' : 'text-red-700'">
+              {{ creation.availableSkillPoints.value }}
+            </span>
           </p>
-          <p class="text-center text-gray-500 py-20">技能分配功能開發中...</p>
+
+          <!-- 技能列表 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+            <div 
+              v-for="skill in allSkills" 
+              :key="skill.key"
+              class="flex items-center justify-between group"
+            >
+              <!-- 技能名稱與說明 -->
+              <div class="relative flex-shrink-0 w-24">
+                <span 
+                  class="text-sm font-medium cursor-help"
+                  :class="isBackgroundSkill(skill.key) ? 'text-blue-700' : 'text-gray-800'"
+                >
+                  {{ skill.name }}
+                  <span v-if="isBackgroundSkill(skill.key)" class="text-xs">★</span>
+                </span>
+                
+                <!-- 技能說明 Tooltip -->
+                <div class="absolute left-0 bottom-full mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-64 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl z-50 pointer-events-none">
+                  <div class="font-semibold mb-1">{{ skill.name }}</div>
+                  <div class="text-gray-200 leading-relaxed">{{ skill.description }}</div>
+                  <div class="absolute top-full left-4 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+                </div>
+              </div>
+              
+              <!-- 技能等級圓圈 -->
+              <div class="flex gap-1">
+                <button
+                  v-for="n in 5"
+                  :key="n"
+                  @click="setSkillLevel(skill.key, n)"
+                  :disabled="n > 3"
+                  :class="[
+                    'w-7 h-7 rounded-full border-2 transition-all relative',
+                    n <= characterStore.skills[skill.key as keyof typeof characterStore.skills]
+                      ? isBackgroundSkill(skill.key)
+                        ? 'bg-blue-600 border-blue-600'
+                        : 'bg-red-900 border-red-900'
+                      : n > 3
+                      ? 'bg-gray-100 border-gray-300 cursor-not-allowed opacity-50'
+                      : 'bg-white border-gray-400 hover:border-red-700 cursor-pointer'
+                  ]"
+                  :title="n > 3 ? '創角時最高 3 級' : `設為 ${n} 級`"
+                >
+                  <!-- 顯示等級數字 -->
+                  <span 
+                    v-if="n <= characterStore.skills[skill.key as keyof typeof characterStore.skills]"
+                    class="absolute inset-0 flex items-center justify-center text-white text-xs font-bold"
+                  >
+                    {{ n }}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 技能等級效果說明 -->
+          <div class="mt-6 p-4 bg-stone-100 rounded-lg border-2 border-stone-300">
+            <h4 class="font-bold text-sm text-red-900 mb-2">技能等級效果</h4>
+            <div class="text-xs text-gray-700 space-y-1">
+              <p><strong>1-2 級:</strong> 基礎熟練度</p>
+              <p><strong>3 級:</strong> 從檢定骰池選擇一顆重骰</p>
+              <p><strong>4 級:</strong> 用結果組成 15 並獲得 2 勢頭</p>
+              <p><strong>5 級:</strong> 結果 10 視為爆炸骰（額外擲一顆骰子）</p>
+              <p class="text-red-600 font-semibold mt-2">⚠️ 創角時，任何技能最高只能達到 3 級</p>
+            </div>
+          </div>
         </div>
 
+        <!-- 步驟 5: 購買優勢 -->
         <div v-else-if="currentStep === 5">
           <h2 class="text-xl font-bold mb-4 text-red-900">步驟 5: 購買優勢</h2>
           <p class="text-gray-700 mb-4">
             你有 <span class="font-bold text-red-700">5 點</span>可購買新的優勢。你只能購買你符合資格的優勢。
           </p>
           <p class="text-sm text-gray-600 mb-6">
-            剩餘點數: <span class="font-bold text-lg">{{ creation.availableAdvantagePoints }}</span>
+            剩餘點數: <span class="font-bold text-lg">{{ creation.availableAdvantagePoints.value }}</span>
           </p>
           <p class="text-center text-gray-500 py-20">優勢購買功能開發中...</p>
         </div>
 
+        <!-- 步驟 6: 選擇阿爾克那 -->
         <div v-else-if="currentStep === 6">
           <h2 class="text-xl font-bold mb-4 text-red-900">步驟 6: 選擇阿爾克那</h2>
           <p class="text-gray-700 mb-6">
@@ -382,7 +474,7 @@ import { useCharacterStore } from '~/stores/characterStore';
 import { useCharacterCreation } from '~/composables/useCharacterCreation';
 import { getNations, type Nation } from '~/data/nations';
 import { getBackgrounds, type Background, categoryNames } from '~/data/backgrounds';
-import { skills } from '~/data/skills';
+import { skills, getSkills } from '~/data/skills';
 import { advantages } from '~/data/advantages';
 
 const characterStore = useCharacterStore();
@@ -393,6 +485,7 @@ const stepTitles = ['國家', '屬性', '背景', '技能', '優勢', '阿爾克
 
 const nations = getNations();
 const allBackgrounds = getBackgrounds();
+const allSkills = getSkills();
 
 // 根據所選國家篩選背景
 const backgrounds = computed(() => {
@@ -474,6 +567,22 @@ const getAdvantageCost = (advantageKey: string): number => {
 
 const getAdvantageDescription = (advantageKey: string): string => {
   return advantages[advantageKey]?.description || '';
+};
+
+const isBackgroundSkill = (skillKey: string): boolean => {
+  return creation.backgroundSkills.value.includes(skillKey);
+};
+
+const setSkillLevel = (skillKey: string, level: number) => {
+  const currentLevel = characterStore.skills[skillKey as keyof typeof characterStore.skills];
+  
+  // 如果點擊同一等級，則降為 0（關閉）
+  if (currentLevel === level) {
+    characterStore.setSkill(skillKey as any, 0);
+  } else {
+    // 否則設為該等級
+    characterStore.setSkill(skillKey as any, level);
+  }
 };
 
 const selectNation = (nationKey: string) => {
