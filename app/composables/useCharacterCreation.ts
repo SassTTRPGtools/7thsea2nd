@@ -46,6 +46,20 @@ export const useCharacterCreation = () => {
     return skills;
   });
 
+  // 從背景獲得的技能及其等級（計算重複）
+  const backgroundSkillsWithLevels = computed<Record<string, number>>(() => {
+    const skillLevels: Record<string, number> = {};
+    characterStore.backgrounds.forEach(bg => {
+      const background = getBackgroundByKey(bg.key);
+      if (background && background.skills) {
+        background.skills.forEach(skill => {
+          skillLevels[skill] = (skillLevels[skill] || 0) + 1;
+        });
+      }
+    });
+    return skillLevels;
+  });
+
   // 從背景獲得的優勢列表
   const backgroundAdvantages = computed<string[]>(() => {
     const advantages: string[] = [];
@@ -61,18 +75,19 @@ export const useCharacterCreation = () => {
   /**
    * 步驟 4: 技能分配
    * 有 10 點技能點數，創角時任何技能不能高於 3 級
-   * 背景技能已自動設為 1 級
+   * 背景技能已自動設為相應等級（重複技能會累計）
    */
   const availableSkillPoints = computed(() => {
     // 計算非背景技能的點數花費
     let spent = 0;
-    const bgSkills = backgroundSkills.value;
+    const bgSkillLevels = backgroundSkillsWithLevels.value;
     
     Object.entries(characterStore.skills).forEach(([skill, level]) => {
       if (level > 0) {
-        // 如果是背景技能，第一級不計入花費
-        if (bgSkills.includes(skill)) {
-          spent += Math.max(0, level - 1);
+        // 如果是背景技能，背景提供的等級不計入花費
+        const bgLevel = bgSkillLevels[skill] || 0;
+        if (bgLevel > 0) {
+          spent += Math.max(0, level - bgLevel);
         } else {
           spent += level;
         }
@@ -153,9 +168,11 @@ export const useCharacterCreation = () => {
    * 應用背景獲得的技能
    */
   const applyBackgroundSkills = () => {
-    backgroundSkills.value.forEach(skill => {
-      if (characterStore.skills[skill as keyof typeof characterStore.skills] === 0) {
-        characterStore.setSkill(skill as keyof typeof characterStore.skills, 1);
+    Object.entries(backgroundSkillsWithLevels.value).forEach(([skill, level]) => {
+      // 設定為背景提供的累計等級（如果當前等級較低）
+      const currentLevel = characterStore.skills[skill as keyof typeof characterStore.skills];
+      if (currentLevel < level) {
+        characterStore.setSkill(skill as keyof typeof characterStore.skills, level);
       }
     });
   };
@@ -233,6 +250,7 @@ export const useCharacterCreation = () => {
 
     // 背景相關
     backgroundSkills,
+    backgroundSkillsWithLevels,
     backgroundAdvantages,
     isBackgroundSkill,
     isBackgroundAdvantage,

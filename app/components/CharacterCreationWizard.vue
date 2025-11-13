@@ -419,49 +419,79 @@
           <div v-if="creation.backgroundSkills.value.length > 0" class="mb-6 p-4 bg-blue-50 border-2 border-blue-400 rounded-lg">
             <h3 class="font-bold text-blue-900 mb-2 flex items-center gap-2">
               <span class="text-xl">📚</span> 
-              背景技能（已自動設為 1 級）
+              背景技能（已自動設定等級）
             </h3>
             <div class="flex flex-wrap gap-2">
               <span
-                v-for="skillKey in creation.backgroundSkills.value"
+                v-for="(level, skillKey) in creation.backgroundSkillsWithLevels.value"
                 :key="skillKey"
-                class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm font-semibold"
+                :class="[
+                  'px-3 py-1 rounded-lg text-sm font-semibold flex items-center gap-1',
+                  level > 1 
+                    ? 'bg-yellow-500 text-white border-2 border-yellow-600' 
+                    : 'bg-blue-600 text-white'
+                ]"
               >
-                {{ getSkillName(skillKey) }}
+                {{ getSkillName(skillKey as string) }}
+                <span class="text-xs">Lv.{{ level }}</span>
+                <span v-if="level > 1" class="text-xs" title="重複的背景技能">⭐</span>
               </span>
             </div>
             <p class="text-xs text-blue-800 mt-2">
-              💡 提示：背景技能的第一級是免費的，提升到 2 級或 3 級才會消耗點數。
+              💡 提示：背景技能的基礎等級是免費的。如果兩個背景都提供同一技能，等級會累計！
+            </p>
+            <p v-if="Object.values(creation.backgroundSkillsWithLevels.value).some((l: number) => l > 1)" class="text-xs text-yellow-800 mt-1 font-semibold">
+              ⭐ 高亮標記的技能來自多個背景，已累計等級！
             </p>
           </div>
 
-          <p class="text-sm text-gray-600 mb-6">
-            剩餘點數: <span class="font-bold text-lg" :class="creation.availableSkillPoints.value === 0 ? 'text-green-700' : 'text-red-700'">
-              {{ creation.availableSkillPoints.value }}
-            </span>
-          </p>
+          <div class="flex items-center justify-between mb-6">
+            <p class="text-sm text-gray-600">
+              剩餘點數: <span class="font-bold text-lg" :class="creation.availableSkillPoints.value === 0 ? 'text-green-700' : 'text-red-700'">
+                {{ creation.availableSkillPoints.value }}
+              </span> / 10
+            </p>
+            <button
+              @click="resetSkillPoints"
+              class="px-4 py-2 bg-stone-500 text-white rounded-lg font-semibold hover:bg-stone-600 transition-all shadow-md flex items-center gap-2"
+              title="重置所有技能點數分配，但保留背景技能"
+            >
+              🔄 重新分配點數
+            </button>
+          </div>
 
           <!-- 技能列表 -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
             <div 
               v-for="skill in allSkills" 
               :key="skill.key"
-              class="flex items-center justify-between group"
+              :class="[
+                'flex items-center justify-between group p-2 rounded-lg transition-all',
+                getBackgroundSkillLevel(skill.key) > 1 
+                  ? 'bg-yellow-50 border-2 border-yellow-400' 
+                  : getBackgroundSkillLevel(skill.key) === 1
+                  ? 'bg-blue-50'
+                  : ''
+              ]"
             >
               <!-- 技能名稱與說明 -->
-              <div class="relative flex-shrink-0 w-24">
+              <div class="relative flex-shrink-0 w-32">
                 <span 
-                  class="text-sm font-medium cursor-help"
-                  :class="isBackgroundSkill(skill.key) ? 'text-blue-700' : 'text-gray-800'"
+                  class="text-sm font-medium cursor-help flex items-center gap-1"
+                  :class="getBackgroundSkillLevel(skill.key) > 1 ? 'text-yellow-800 font-bold' : isBackgroundSkill(skill.key) ? 'text-blue-700' : 'text-gray-800'"
                 >
                   {{ skill.name }}
-                  <span v-if="isBackgroundSkill(skill.key)" class="text-xs">★</span>
+                  <span v-if="getBackgroundSkillLevel(skill.key) > 1" class="text-yellow-600" title="重複的背景技能">⭐</span>
+                  <span v-else-if="isBackgroundSkill(skill.key)" class="text-blue-600">★</span>
                 </span>
                 
                 <!-- 技能說明 Tooltip -->
                 <div class="absolute left-0 bottom-full mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-64 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl z-50 pointer-events-none">
                   <div class="font-semibold mb-1">{{ skill.name }}</div>
                   <div class="text-gray-200 leading-relaxed">{{ skill.description }}</div>
+                  <div v-if="getBackgroundSkillLevel(skill.key) > 0" class="text-yellow-300 mt-1 font-semibold">
+                    背景提供: Lv.{{ getBackgroundSkillLevel(skill.key) }}
+                  </div>
                   <div class="absolute top-full left-4 -mt-1 border-4 border-transparent border-t-gray-900"></div>
                 </div>
               </div>
@@ -1148,6 +1178,18 @@ const clearArcanas = () => {
 
 const isBackgroundSkill = (skillKey: string): boolean => {
   return creation.backgroundSkills.value.includes(skillKey);
+};
+
+const getBackgroundSkillLevel = (skillKey: string): number => {
+  return creation.backgroundSkillsWithLevels.value[skillKey] || 0;
+};
+
+const resetSkillPoints = () => {
+  // 重置所有技能到背景提供的等級
+  Object.keys(characterStore.skills).forEach(skillKey => {
+    const bgLevel = getBackgroundSkillLevel(skillKey);
+    characterStore.setSkill(skillKey as any, bgLevel);
+  });
 };
 
 const setSkillLevel = (skillKey: string, level: number) => {
