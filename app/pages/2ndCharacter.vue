@@ -36,7 +36,7 @@
       </div>
 
       <!-- 角色創建嚮導 -->
-      <CharacterCreationWizard v-if="showCreationWizard" />
+      <CharacterCreationWizard v-if="showCreationWizard" @complete="onWizardComplete" />
 
       <!-- 三欄佈局 -->
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
@@ -77,7 +77,31 @@ onMounted(() => {
 });
 
 const toggleCreationWizard = () => {
+  // 如果正要開啟嚮導，檢查是否已有資料
+  if (!showCreationWizard.value) {
+    const hasData = characterStore.characterName || 
+                    characterStore.nation || 
+                    characterStore.backgrounds.length > 0;
+    
+    if (hasData) {
+      const confirmClear = confirm(
+        '檢測到已有角色資料。\n\n' +
+        '點擊「確定」清除資料並創建新角色\n' +
+        '點擊「取消」繼續編輯現有角色'
+      );
+      if (confirmClear) {
+        characterStore.resetCharacter();
+      } else {
+        // 取消，不開啟嚮導
+        return;
+      }
+    }
+  }
   showCreationWizard.value = !showCreationWizard.value;
+};
+
+const onWizardComplete = () => {
+  showCreationWizard.value = false;
 };
 
 const exportCharacter = () => {

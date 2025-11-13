@@ -573,10 +573,149 @@
         <!-- 步驟 6: 選擇阿爾克那 -->
         <div v-else-if="currentStep === 6">
           <h2 class="text-xl font-bold mb-4 text-red-900">步驟 6: 選擇阿爾克那</h2>
-          <p class="text-gray-700 mb-6">
+          <p class="text-gray-700 mb-4">
             每位英雄都有其命運。選擇一個<span class="font-bold text-red-700">美德</span>與一個<span class="font-bold text-red-700">傲性</span>：你的正位牌與交叉牌。
           </p>
-          <p class="text-center text-gray-500 py-20">阿爾克那選擇功能開發中...</p>
+
+          <!-- 隨機選擇按鈕 -->
+          <div class="mb-6 flex gap-3">
+            <button
+              @click="randomVirtue"
+              class="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all shadow-md flex items-center gap-2"
+            >
+              🎲 隨機美德
+            </button>
+            <button
+              @click="randomHubris"
+              class="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all shadow-md flex items-center gap-2"
+            >
+              🎲 隨機傲性
+            </button>
+            <button
+              v-if="characterStore.virtue || characterStore.hubris"
+              @click="clearArcanas"
+              class="px-6 py-3 bg-stone-400 text-white rounded-lg font-semibold hover:bg-stone-500 transition-all shadow-md"
+            >
+              清除選擇
+            </button>
+          </div>
+
+          <!-- 已選擇顯示 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <!-- 已選美德 -->
+            <div v-if="characterStore.virtue" class="p-4 bg-green-50 border-2 border-green-500 rounded-lg">
+              <h3 class="font-bold text-green-900 mb-2 flex items-center gap-2">
+                <span class="text-xl">✨</span> 
+                已選美德
+              </h3>
+              <div class="bg-white p-3 rounded">
+                <p class="font-bold text-lg text-green-800 mb-1">{{ selectedVirtueDetails?.name }}</p>
+                <p class="text-sm text-gray-700">{{ selectedVirtueDetails?.description }}</p>
+                <p class="text-xs text-gray-500 mt-2">來自: {{ getArcanaName(characterStore.virtue?.arcanaKey || '') }}</p>
+              </div>
+            </div>
+
+            <!-- 已選傲性 -->
+            <div v-if="characterStore.hubris" class="p-4 bg-purple-50 border-2 border-purple-500 rounded-lg">
+              <h3 class="font-bold text-purple-900 mb-2 flex items-center gap-2">
+                <span class="text-xl">⚠️</span> 
+                已選傲性
+              </h3>
+              <div class="bg-white p-3 rounded">
+                <p class="font-bold text-lg text-purple-800 mb-1">{{ selectedHubrisDetails?.name }}</p>
+                <p class="text-sm text-gray-700">{{ selectedHubrisDetails?.description }}</p>
+                <p class="text-xs text-gray-500 mt-2">來自: {{ getArcanaName(characterStore.hubris?.arcanaKey || '') }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 阿爾克那列表 -->
+          <div class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+            <div
+              v-for="arcana in allArcanas"
+              :key="arcana.key"
+              class="p-4 border-2 rounded-lg transition-all hover:shadow-md"
+              :class="[
+                isArcanaSelected(arcana.key) 
+                  ? 'border-red-700 bg-red-50' 
+                  : 'border-stone-300 hover:border-red-500'
+              ]"
+            >
+              <!-- 阿爾克那標題 -->
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-xl">{{ arcana.name }}</h3>
+                <span class="text-sm text-gray-500">{{ arcana.nameEn }}</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- 美德 -->
+                <div 
+                  @click="selectVirtue(arcana.key)"
+                  :class="[
+                    'p-3 rounded-lg cursor-pointer transition-all',
+                    characterStore.virtue?.arcanaKey === arcana.key
+                      ? 'bg-green-600 text-white ring-2 ring-green-400'
+                      : 'bg-green-50 hover:bg-green-100 border-2 border-green-300'
+                  ]"
+                >
+                  <div class="flex items-start gap-2 mb-2">
+                    <span class="text-lg">✨</span>
+                    <div class="flex-1">
+                      <p 
+                        :class="[
+                          'font-bold mb-1',
+                          characterStore.virtue?.arcanaKey === arcana.key ? 'text-white' : 'text-green-800'
+                        ]"
+                      >
+                        美德: {{ arcana.virtue.name }}
+                      </p>
+                      <p 
+                        :class="[
+                          'text-sm leading-relaxed',
+                          characterStore.virtue?.arcanaKey === arcana.key ? 'text-green-50' : 'text-gray-700'
+                        ]"
+                      >
+                        {{ arcana.virtue.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 傲性 -->
+                <div 
+                  @click="selectHubris(arcana.key)"
+                  :class="[
+                    'p-3 rounded-lg cursor-pointer transition-all',
+                    characterStore.hubris?.arcanaKey === arcana.key
+                      ? 'bg-purple-600 text-white ring-2 ring-purple-400'
+                      : 'bg-purple-50 hover:bg-purple-100 border-2 border-purple-300'
+                  ]"
+                >
+                  <div class="flex items-start gap-2 mb-2">
+                    <span class="text-lg">⚠️</span>
+                    <div class="flex-1">
+                      <p 
+                        :class="[
+                          'font-bold mb-1',
+                          characterStore.hubris?.arcanaKey === arcana.key ? 'text-white' : 'text-purple-800'
+                        ]"
+                      >
+                        傲性: {{ arcana.hubris.name }}
+                      </p>
+                      <p 
+                        :class="[
+                          'text-sm leading-relaxed',
+                          characterStore.hubris?.arcanaKey === arcana.key ? 'text-purple-50' : 'text-gray-700'
+                        ]"
+                      >
+                        {{ arcana.hubris.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -609,6 +748,12 @@ import { getNations, type Nation } from '~/data/nations';
 import { getBackgrounds, type Background, categoryNames } from '~/data/backgrounds';
 import { skills, getSkills } from '~/data/skills';
 import { advantages, getAdvantages, getAdvantageActualCost as getActualCost, type Advantage } from '~/data/advantages';
+import { getArcanas, type Arcana } from '~/data/arcanas';
+
+// 定義 emit 事件
+const emit = defineEmits<{
+  complete: []
+}>();
 
 const characterStore = useCharacterStore();
 const creation = useCharacterCreation();
@@ -620,9 +765,21 @@ const nations = getNations();
 const allBackgrounds = getBackgrounds();
 const allSkills = getSkills();
 const allAdvantages = getAdvantages();
+const allArcanas = getArcanas();
 
 // 步驟 5: 優勢購買
 const selectedCostFilter = ref<number | null>(null);
+
+// 步驟 6: 阿爾克那
+const selectedVirtueDetails = computed(() => {
+  if (!characterStore.virtue) return null;
+  return characterStore.virtue;
+});
+
+const selectedHubrisDetails = computed(() => {
+  if (!characterStore.hubris) return null;
+  return characterStore.hubris;
+});
 
 // 已購買的優勢（排除背景優勢）
 const purchasedAdvantages = computed(() => {
@@ -775,6 +932,53 @@ const getDiscountReason = (advantage: Advantage): string => {
   return discount?.condition || '';
 };
 
+const getArcanaName = (arcanaKey: string): string => {
+  const arcana = allArcanas.find(a => a.key === arcanaKey);
+  return arcana?.name || arcanaKey;
+};
+
+const isArcanaSelected = (arcanaKey: string): boolean => {
+  return characterStore.virtue?.arcanaKey === arcanaKey || 
+         characterStore.hubris?.arcanaKey === arcanaKey;
+};
+
+const selectVirtue = (arcanaKey: string) => {
+  const arcana = allArcanas.find(a => a.key === arcanaKey);
+  if (arcana) {
+    characterStore.setVirtue(arcanaKey, arcana.virtue.name, arcana.virtue.description);
+  }
+};
+
+const selectHubris = (arcanaKey: string) => {
+  const arcana = allArcanas.find(a => a.key === arcanaKey);
+  if (arcana) {
+    characterStore.setHubris(arcanaKey, arcana.hubris.name, arcana.hubris.description);
+  }
+};
+
+const randomVirtue = () => {
+  if (allArcanas.length === 0) return;
+  const randomIndex = Math.floor(Math.random() * allArcanas.length);
+  const randomArcana = allArcanas[randomIndex];
+  if (randomArcana) {
+    selectVirtue(randomArcana.key);
+  }
+};
+
+const randomHubris = () => {
+  if (allArcanas.length === 0) return;
+  const randomIndex = Math.floor(Math.random() * allArcanas.length);
+  const randomArcana = allArcanas[randomIndex];
+  if (randomArcana) {
+    selectHubris(randomArcana.key);
+  }
+};
+
+const clearArcanas = () => {
+  characterStore.setVirtue('', '', '');
+  characterStore.setHubris('', '', '');
+};
+
 const isBackgroundSkill = (skillKey: string): boolean => {
   return creation.backgroundSkills.value.includes(skillKey);
 };
@@ -875,8 +1079,9 @@ const nextStep = () => {
     if (currentStep.value < 6) {
       currentStep.value++;
     } else {
-      // 完成創建
-      alert('角色創建完成！');
+      // 完成創建，保存到 localStorage 並觸發完成事件
+      characterStore.saveToLocalStorage();
+      emit('complete');
     }
   }
 };
