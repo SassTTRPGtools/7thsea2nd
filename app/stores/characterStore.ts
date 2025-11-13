@@ -10,7 +10,10 @@ export interface CharacterData {
   reputations: string[];
   wealth: number;
 
-  // 屬性 (Traits)
+  // 國家屬性加值（單獨追蹤，不計入基礎屬性）
+  nationTraitBonus: string | null; // 'brawn', 'finesse', 'resolve', 'wits', 'panache'
+
+  // 屬性 (Traits) - 這是基礎屬性值，不包含國家加值
   traits: {
     brawn: number;
     finesse: number;
@@ -89,6 +92,8 @@ export const useCharacterStore = defineStore('character', {
     reputations: [],
     wealth: 0,
 
+    nationTraitBonus: null,
+
     traits: {
       brawn: 2,
       finesse: 2,
@@ -134,6 +139,15 @@ export const useCharacterStore = defineStore('character', {
     // 計算總屬性點數
     totalTraitPoints: (state) => {
       return Object.values(state.traits).reduce((sum, val) => sum + val, 0);
+    },
+
+    // 計算包含國家加值的最終屬性值
+    finalTraits(): Record<string, number> {
+      const final: Record<string, number> = { ...this.traits };
+      if (this.nationTraitBonus) {
+        final[this.nationTraitBonus] = (final[this.nationTraitBonus] || 0) + 1;
+      }
+      return final;
     },
 
     // 計算已分配的屬性點數（扣除基礎 10 點）
@@ -205,6 +219,12 @@ export const useCharacterStore = defineStore('character', {
       }
     },
 
+    // 設定國家屬性加值
+    setNationTraitBonus(trait: string | null) {
+      this.nationTraitBonus = trait;
+      this.saveToLocalStorage();
+    },
+
     // 設定技能值
     setSkill(skill: keyof CharacterData['skills'], value: number) {
       if (value >= 0 && value <= 5) {
@@ -216,6 +236,8 @@ export const useCharacterStore = defineStore('character', {
     // 設定國家
     setNation(nationKey: string) {
       this.nation = nationKey;
+      // 重置國家屬性加值（當更換國家時）
+      this.nationTraitBonus = null;
       this.saveToLocalStorage();
     },
 

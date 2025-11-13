@@ -41,35 +41,99 @@
         <div v-if="currentStep === 1">
           <h2 class="text-xl font-bold mb-4 text-red-900">步驟 1: 選擇國家</h2>
           <p class="text-gray-700 mb-6">
-            你會依照英雄所屬的國家獲得一項屬性加值選項。
+            選擇你的英雄所屬的國家。每個國家都有獨特的文化背景與特色。
           </p>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <button
               v-for="nation in nations"
               :key="nation.key"
               @click="selectNation(nation.key)"
               :class="[
-                'p-4 border-2 rounded text-left transition-all',
+                'p-4 border-2 rounded-lg text-left transition-all hover:shadow-lg',
                 characterStore.nation === nation.key
-                  ? 'border-red-700 bg-red-50'
+                  ? 'border-red-700 bg-red-50 ring-2 ring-red-300'
                   : 'border-stone-300 hover:border-red-500'
               ]"
             >
-              <h3 class="font-bold text-lg">{{ nation.name }}</h3>
-              <p class="text-sm text-gray-600 mt-1">
-                屬性加值: 
-                <span class="font-semibold">
-                  {{ nation.traitBonuses.map(t => t.label).join(' 或 ') }}
-                </span>
-              </p>
+              <div class="flex items-start gap-3">
+                <img 
+                  :src="getNationImage(nation.key)" 
+                  :alt="nation.name"
+                  class="w-16 h-16 object-cover rounded border-2 border-stone-300"
+                />
+                <div class="flex-1">
+                  <h3 class="font-bold text-lg">{{ nation.name }}</h3>
+                </div>
+              </div>
             </button>
           </div>
 
-          <!-- 國家詳情 -->
-          <div v-if="selectedNation" class="mt-6 p-4 bg-stone-100 rounded">
-            <h4 class="font-bold text-lg mb-2">{{ selectedNation.name }}</h4>
-            <p class="text-sm text-gray-700 whitespace-pre-line">{{ selectedNation.description }}</p>
+          <!-- 國家詳細資訊 -->
+          <div v-if="selectedNation" class="mt-6 bg-stone-100 rounded-lg overflow-hidden border-2 border-stone-300">
+            <div class="relative h-48 overflow-hidden">
+              <img 
+                :src="getNationImage(selectedNation.key)" 
+                :alt="selectedNation.name"
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+              <h3 class="absolute bottom-4 left-4 text-white text-2xl font-bold drop-shadow-lg">
+                {{ selectedNation.name }}
+              </h3>
+            </div>
+            
+            <div class="p-6 space-y-4 max-h-[500px] overflow-y-auto">
+              <!-- 描述 -->
+              <div>
+                <h4 class="font-bold text-red-900 mb-2 flex items-center gap-2">
+                  <span class="text-xl">📖</span> 描述
+                </h4>
+                <p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                  {{ selectedNation.description }}
+                </p>
+              </div>
+
+              <!-- 外貌 -->
+              <div v-if="selectedNation.appearance">
+                <h4 class="font-bold text-red-900 mb-2 flex items-center gap-2">
+                  <span class="text-xl">👤</span> 外貌
+                </h4>
+                <p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                  {{ selectedNation.appearance }}
+                </p>
+              </div>
+
+              <!-- 常見職業 -->
+              <div v-if="selectedNation.commonProfessions">
+                <h4 class="font-bold text-red-900 mb-2 flex items-center gap-2">
+                  <span class="text-xl">⚔️</span> 常見職業
+                </h4>
+                <p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                  {{ selectedNation.commonProfessions }}
+                </p>
+              </div>
+
+              <!-- 信仰 -->
+              <div v-if="selectedNation.religion">
+                <h4 class="font-bold text-red-900 mb-2 flex items-center gap-2">
+                  <span class="text-xl">✝️</span> 信仰
+                </h4>
+                <p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                  {{ selectedNation.religion }}
+                </p>
+              </div>
+
+              <!-- 態度 -->
+              <div v-if="selectedNation.attitude">
+                <h4 class="font-bold text-red-900 mb-2 flex items-center gap-2">
+                  <span class="text-xl">💭</span> 態度
+                </h4>
+                <p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                  {{ selectedNation.attitude }}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -79,6 +143,35 @@
           <p class="text-gray-700 mb-4">
             每位英雄的所有屬性起始為 2，你有 <span class="font-bold text-red-700">2 點</span>可用來提升屬性。
           </p>
+
+          <!-- 國家屬性加值選擇 -->
+          <div v-if="selectedNation && !characterStore.nationTraitBonus" class="mb-6 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+            <h3 class="font-bold text-yellow-900 mb-3 flex items-center gap-2">
+              <span class="text-xl">⭐</span> 
+              {{ selectedNation.name }} 國家加值
+            </h3>
+            <p class="text-sm text-yellow-800 mb-3">
+              選擇一項屬性獲得 +1 加值（此加值不計入 2 點分配額度）
+            </p>
+            <div class="flex gap-3">
+              <button
+                v-for="bonus in selectedNation.traitBonuses"
+                :key="bonus.trait"
+                @click="selectTraitBonus(bonus.trait)"
+                class="flex-1 px-4 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-semibold transition-all shadow-md"
+              >
+                {{ bonus.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- 已選擇的國家加值 -->
+          <div v-if="characterStore.nationTraitBonus" class="mb-6 p-3 bg-green-50 border-2 border-green-400 rounded-lg">
+            <p class="text-sm text-green-800">
+              ✓ 已選擇國家加值: <span class="font-bold">{{ getTraitLabel(characterStore.nationTraitBonus) }} +1</span>
+            </p>
+          </div>
+
           <p class="text-sm text-gray-600 mb-6">
             剩餘點數: <span class="font-bold text-lg">{{ characterStore.remainingTraitPoints }}</span>
           </p>
@@ -90,8 +183,22 @@
               class="p-4 border-2 border-stone-300 rounded"
             >
               <div class="flex justify-between items-center mb-2">
-                <span class="font-bold">{{ getTraitLabel(trait) }}</span>
-                <span class="text-2xl font-bold text-red-900">{{ value }}</span>
+                <span class="font-bold">{{ getTraitLabel(trait) }} {{trait.description}}</span>
+                <div class="flex items-center gap-2">
+                  <span 
+                    v-if="trait === characterStore.nationTraitBonus" 
+                    class="text-xs text-green-700 font-semibold"
+                  >
+                    (+1 國家)
+                  </span>
+                  <span class="text-2xl font-bold text-red-900">{{ value }}</span>
+                  <span 
+                    v-if="trait === characterStore.nationTraitBonus" 
+                    class="text-lg text-gray-500"
+                  >
+                    (總計: {{ value + 1 }})
+                  </span>
+                </div>
               </div>
               <div class="flex gap-2">
                 <button
@@ -142,26 +249,62 @@
 
           <!-- 背景列表 -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
+            <div
               v-for="bg in backgrounds"
               :key="bg.key"
-              @click="toggleBackground(bg)"
-              :disabled="!canSelectBackground(bg.key)"
               :class="[
-                'p-4 border-2 rounded text-left transition-all',
+                'p-4 border-2 rounded transition-all',
                 isBackgroundSelected(bg.key)
                   ? 'border-red-700 bg-red-50'
                   : canSelectBackground(bg.key)
-                  ? 'border-stone-300 hover:border-red-500'
+                  ? 'border-stone-300 hover:border-red-500 cursor-pointer'
                   : 'border-stone-200 bg-stone-100 opacity-50 cursor-not-allowed'
               ]"
+              @click="canSelectBackground(bg.key) && toggleBackground(bg)"
             >
-              <h3 class="font-bold">{{ bg.name }}</h3>
-              <p class="text-xs text-gray-600 mt-1">{{ bg.description }}</p>
-              <div class="mt-2 text-xs">
-                <span class="text-green-700 font-semibold">技能:</span> {{ bg.skills?.join(', ') }}
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg">{{ bg.name }}</h3>
+                <span class="text-xs bg-stone-200 px-2 py-1 rounded">
+                  {{ getCategoryLabel(bg.category) }}
+                </span>
               </div>
-            </button>
+              
+              <p class="text-xs text-gray-700 mb-3 leading-relaxed">{{ bg.description }}</p>
+              
+              <!-- 癖性 -->
+              <div class="mb-3 p-2 bg-yellow-50 rounded border border-yellow-200">
+                <p class="text-xs font-semibold text-yellow-900 mb-1">🎭 癖性</p>
+                <p class="text-xs text-yellow-800 leading-relaxed">{{ bg.quirk }}</p>
+              </div>
+              
+              <!-- 優勢 -->
+              <div class="mb-2">
+                <p class="text-xs font-semibold text-green-700 mb-1">✨ 優勢</p>
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="advKey in bg.advantages"
+                    :key="advKey"
+                    class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
+                  >
+                    {{ getAdvantageName(advKey) }}
+                  </span>
+                </div>
+              </div>
+              
+              <!-- 技能 -->
+              <div>
+                <p class="text-xs font-semibold text-blue-700 mb-1">🎯 技能</p>
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="skillKey in bg.skills"
+                    :key="skillKey"
+                    class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                  >
+                    {{ getSkillName(skillKey) }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -224,7 +367,9 @@ import { ref, computed, onMounted } from 'vue';
 import { useCharacterStore } from '~/stores/characterStore';
 import { useCharacterCreation } from '~/composables/useCharacterCreation';
 import { getNations, type Nation } from '~/data/nations';
-import { getBackgrounds, type Background } from '~/data/backgrounds';
+import { getBackgrounds, type Background, categoryNames } from '~/data/backgrounds';
+import { skills } from '~/data/skills';
+import { advantages } from '~/data/advantages';
 
 const characterStore = useCharacterStore();
 const creation = useCharacterCreation();
@@ -245,6 +390,25 @@ const selectedNation = computed(() => {
   return nations.find(n => n.key === characterStore.nation);
 });
 
+// 獲取國家圖片路徑
+const getNationImage = (nationKey: string): string => {
+  // 移到 public 資料夾的圖片可以直接用 /path 存取
+  // 或者從 assets 引入需要使用 import
+  const imageMap: Record<string, string> = {
+    avalon: '/nations/Avalon.webp',
+    inismore: '/nations/Inismore.webp',
+    highlandMarches: '/nations/The Highland Marches.webp',
+    castille: '/nations/Castille.webp',
+    eisen: '/nations/Eisen.webp',
+    montaigne: '/nations/Montaigne.webp',
+    sarmatianCommonwealth: '/nations/The Sarmatian.webp',
+    ussura: '/nations/Ussura.webp',
+    vestenmennavenjar: '/nations/Vestenmennavenjar.webp',
+    vodacce: '/nations/Vodacce.webp'
+  };
+  return imageMap[nationKey] || '/logo.png';
+};
+
 const getTraitLabel = (trait: string): string => {
   const labels: Record<string, string> = {
     brawn: '體魄',
@@ -256,8 +420,24 @@ const getTraitLabel = (trait: string): string => {
   return labels[trait] || trait;
 };
 
+const getCategoryLabel = (category: Background['category']): string => {
+  return categoryNames[category] || category;
+};
+
+const getSkillName = (skillKey: string): string => {
+  return skills[skillKey]?.name || skillKey;
+};
+
+const getAdvantageName = (advantageKey: string): string => {
+  return advantages[advantageKey]?.name || advantageKey;
+};
+
 const selectNation = (nationKey: string) => {
   characterStore.setNation(nationKey);
+};
+
+const selectTraitBonus = (trait: string) => {
+  characterStore.setNationTraitBonus(trait);
 };
 
 const increaseTrait = (trait: string) => {
@@ -267,7 +447,10 @@ const increaseTrait = (trait: string) => {
 
 const decreaseTrait = (trait: string) => {
   const current = characterStore.traits[trait as keyof typeof characterStore.traits];
-  characterStore.setTrait(trait as keyof typeof characterStore.traits, current - 1);
+  // 基礎屬性最低為 2
+  if (current > 2) {
+    characterStore.setTrait(trait as keyof typeof characterStore.traits, current - 1);
+  }
 };
 
 const isBackgroundSelected = (bgKey: string): boolean => {
@@ -294,7 +477,9 @@ const toggleBackground = (bg: Background) => {
 const isStepComplete = (step: number): boolean => {
   switch (step) {
     case 1: return creation.isStep1Complete.value;
-    case 2: return creation.isStep2Complete.value;
+    case 2: 
+      // 步驟 2 需要選擇國家加值並分配完 2 點屬性
+      return !!characterStore.nationTraitBonus && creation.isStep2Complete.value;
     case 3: return creation.isStep3Complete.value;
     case 4: return creation.isStep4Complete.value;
     case 5: return creation.isStep5Complete.value;

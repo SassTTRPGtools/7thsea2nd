@@ -2,7 +2,7 @@
   <div class="min-h-screen relative bg-gradient-to-br from-stone-200 via-stone-100 to-stone-300">
     <!-- 背景圖片 -->
     <div class="fixed inset-0 opacity-10 bg-cover bg-center pointer-events-none"
-         :style="{ backgroundImage: `url(/sheet_background.webp)` }">
+         style="background-image: url('/sheet_background.webp')">
     </div>
 
     <!-- 主要內容 -->
