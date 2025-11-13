@@ -11,8 +11,8 @@ export default defineNuxtConfig({
   tailwindcss: { viewer: true, exposeConfig: true },
 
   app: {
-    baseURL: '/7thsea/',
-    buildAssetsDir: '/_nuxt/',
+    baseURL: '/7thsea2nd/',
+    buildAssetsDir: '_nuxt/',
     head: {
       link: [
         {
