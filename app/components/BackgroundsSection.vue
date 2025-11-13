@@ -24,14 +24,6 @@
                 <span class="font-semibold">癖性:</span> {{ getBackgroundDetails(bg.key)!.quirk }}
               </p>
             </div>
-            <div class="flex flex-wrap gap-1 pt-1">
-              <span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 rounded">
-                優勢: {{ formatAdvantages(getBackgroundDetails(bg.key)!.advantages) }}
-              </span>
-              <span class="text-xs px-2 py-0.5 bg-green-100 text-green-800 rounded">
-                技能: {{ formatSkills(getBackgroundDetails(bg.key)!.skills) }}
-              </span>
-            </div>
           </div>
         </div>
       </div>

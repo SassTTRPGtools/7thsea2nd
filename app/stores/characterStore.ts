@@ -9,6 +9,7 @@ export interface CharacterData {
   religion: string;
   reputations: string[];
   wealth: number;
+  heroPoints: number; // 英雄點
 
   // 國家屬性加值（單獨追蹤，不計入基礎屬性）
   nationTraitBonus: string | null; // 'brawn', 'finesse', 'resolve', 'wits', 'panache'
@@ -91,6 +92,7 @@ export const useCharacterStore = defineStore('character', {
     religion: '',
     reputations: [],
     wealth: 0,
+    heroPoints: 0,
 
     nationTraitBonus: null,
 
@@ -229,6 +231,14 @@ export const useCharacterStore = defineStore('character', {
     setSkill(skill: keyof CharacterData['skills'], value: number) {
       if (value >= 0 && value <= 5) {
         this.skills[skill] = value;
+        this.saveToLocalStorage();
+      }
+    },
+
+    // 設定英雄點
+    setHeroPoints(value: number) {
+      if (value >= 0) {
+        this.heroPoints = value;
         this.saveToLocalStorage();
       }
     },

@@ -42,11 +42,40 @@
         </div>
       </div>
 
-      <!-- 技能說明 -->
-      <div class="mt-4 pt-3 border-t border-gray-300 text-xs text-gray-600 space-y-1">
-        <p><strong>3 級:</strong> 從檢定骰池選擇一顆重骰</p>
-        <p><strong>4 級:</strong> 用結果組成 15 並獲得 2 勢頭</p>
-        <p><strong>5 級:</strong> 結果 10 視為爆炸骰 (額外擲一顆骰子)</p>
+      <!-- 技能說明與英雄點 -->
+      <div class="mt-4 pt-3 border-t border-gray-300 flex gap-4">
+        <!-- 左側：技能說明 -->
+        <div class="flex-1 text-xs text-gray-600 space-y-1">
+          <p><strong>3 級:</strong> 從檢定骰池選擇一顆重骰</p>
+          <p><strong>4 級:</strong> 用結果組成 15 並獲得 2 勢頭</p>
+          <p><strong>5 級:</strong> 結果 10 視為爆炸骰 (額外擲一顆骰子)</p>
+        </div>
+        
+        <!-- 右側：英雄點 -->
+        <div class="flex flex-col items-center justify-center bg-yellow-50 border-2 border-yellow-600 rounded-lg px-4 py-2 min-w-[120px]">
+          <div class="text-xs font-bold text-yellow-900 mb-1">英雄點</div>
+          <div class="flex items-center gap-2">
+            <button
+              @click="decreaseHeroPoints"
+              :disabled="characterStore.heroPoints <= 0"
+              class="w-7 h-7 rounded-full bg-yellow-600 text-white font-bold hover:bg-yellow-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+            >
+              −
+            </button>
+            <input
+              v-model.number="characterStore.heroPoints"
+              type="number"
+              min="0"
+              class="w-12 text-center text-xl font-bold bg-white border-2 border-yellow-600 rounded px-1 py-1"
+            />
+            <button
+              @click="increaseHeroPoints"
+              class="w-7 h-7 rounded-full bg-yellow-600 text-white font-bold hover:bg-yellow-700 transition-all flex items-center justify-center"
+            >
+              +
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -61,6 +90,16 @@ const skills = getAllSkills();
 
 const setSkillValue = (skillKey: string, value: number) => {
   characterStore.setSkill(skillKey as any, value);
+};
+
+const increaseHeroPoints = () => {
+  characterStore.setHeroPoints(characterStore.heroPoints + 1);
+};
+
+const decreaseHeroPoints = () => {
+  if (characterStore.heroPoints > 0) {
+    characterStore.setHeroPoints(characterStore.heroPoints - 1);
+  }
 };
 </script>
 
