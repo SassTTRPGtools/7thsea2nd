@@ -32,7 +32,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '好奇',
-      description: '當你去探查某件不尋常、尤其是看起來危險的事物時，獲得一點英雄點。',
+      description: '當你去探查某件不尋常、尤其是看起來危險的事物時，獲得１點英雄點。',
     }
   },
   road: {
@@ -45,7 +45,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '缺乏自信',
-      description: '當你的英雄認為自己若無他人幫助便無法行動時，獲得一點英雄點——例如堅持要求另一位英雄花費英雄點給你額外骰數，或請她使用優勢協助你。',
+      description: '當你的英雄認為自己若無他人幫助便無法行動時，獲得１點英雄點——例如堅持要求另一位英雄花費英雄點給你額外骰數，或請她使用優勢協助你。',
     }
   },
   magician: {
@@ -58,7 +58,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '野心',
-      description: '當你追逐力量，而這份追求本身充滿危險或導致麻煩時，獲得一點英雄點。',
+      description: '當你追逐力量，而這份追求本身充滿危險或導致麻煩時，獲得１點英雄點。',
     }
   },
   lovers: {
@@ -71,7 +71,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '命運多舛',
-      description: '當你的英雄愛上了一個她絕不該愛的人時，獲得一點英雄點。',
+      description: '當你的英雄愛上了一個她絕不該愛的人時，獲得１點英雄點。',
     }
   },
   wheel: {
@@ -84,7 +84,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '不幸',
-      description: '當你選擇在擲骰前主動讓一次重要的檢定失敗時，獲得兩點英雄點。',
+      description: '當你選擇在擲骰前主動讓一次重要的檢定失敗時，獲得２點英雄點。',
     }
   },
   devil: {
@@ -97,7 +97,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '輕信',
-      description: '當你接受他人的謊言或不公平的交易時，獲得一點英雄點。',
+      description: '當你接受他人的謊言或不公平的交易時，獲得１點英雄點。',
     }
   },
   tower: {
@@ -106,11 +106,11 @@ export const arcanas: Record<string, Arcana> = {
     nameEn: 'The Tower',
     virtue: {
       name: '謙遜',
-      description: '啟動你的美德時，當你觸發傲性或癖性而獲得英雄點時，改為獲得兩點而非一點。',
+      description: '啟動你的美德時，當你觸發傲性或癖性而獲得英雄點時，改為獲得２點而非１點。',
     },
     hubris: {
       name: '傲慢',
-      description: '當你的英雄對反派或可能傷害朋友的人表現出輕蔑、鄙視或居高臨下態度時，獲得一點英雄點。',
+      description: '當你的英雄對反派或可能傷害朋友的人表現出輕蔑、鄙視或居高臨下態度時，獲得１點英雄點。',
     }
   },
   beggar: {
@@ -123,7 +123,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '嫉妒',
-      description: '當你的英雄因渴望某物而採取不智行動時，獲得一點英雄點。',
+      description: '當你的英雄因渴望某物而採取不智行動時，獲得１點英雄點。',
     }
   },
   witch: {
@@ -136,7 +136,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '操弄',
-      description: '當你企圖讓他人替你做骯髒工作，結果卻反遭反噬時，獲得一點英雄點。',
+      description: '當你企圖讓他人替你做骯髒工作，結果卻反遭反噬時，獲得１點英雄點。',
     }
   },
   war: {
@@ -149,7 +149,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '忠誠',
-      description: '當你的英雄返回救援倒下的同伴，或拒絕拋下受傷盟友時，獲得一點英雄點。',
+      description: '當你的英雄返回救援倒下的同伴，或拒絕拋下受傷盟友時，獲得１點英雄點。',
     }
   },
   hangedMan: {
@@ -162,7 +162,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '猶豫',
-      description: '當你的英雄因遲疑、懷疑或不確定而浪費一次行動時，獲得一點英雄點。',
+      description: '當你的英雄因遲疑、懷疑或不確定而浪費一次行動時，獲得１點英雄點。',
     }
   },
   ferryman: {
@@ -175,7 +175,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '執著',
-      description: '當你拒絕適可而止、無法放手或在成功後仍不願停下而惹出麻煩時，獲得一點英雄點。',
+      description: '當你拒絕適可而止、無法放手或在成功後仍不願停下而惹出麻煩時，獲得１點英雄點。',
     }
   },
   thrones: {
@@ -188,7 +188,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '固執',
-      description: '當你的英雄在明確證據面前仍拒絕改變主意時，獲得一點英雄點。',
+      description: '當你的英雄在明確證據面前仍拒絕改變主意時，獲得１點英雄點。',
     }
   },
   moonlessNight: {
@@ -201,7 +201,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '混亂',
-      description: '當你的英雄誤解了重要劇情要素，並因此導致自己或他人陷入危險時，獲得一點英雄點。',
+      description: '當你的英雄誤解了重要劇情要素，並因此導致自己或他人陷入危險時，獲得１點英雄點。',
     }
   },
   sun: {
@@ -214,7 +214,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '驕傲',
-      description: '當你的英雄拒絕他人協助時獲得一點英雄點——例如有另一位英雄試圖花費英雄點給你額外骰數，而你選擇拒絕。',
+      description: '當你的英雄拒絕他人協助時獲得１點英雄點——例如有另一位英雄試圖花費英雄點給你額外骰數，而你選擇拒絕。',
     }
   },
   prophet: {
@@ -227,7 +227,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '過於狂熱',
-      description: '當你的英雄在不合時宜的時刻強烈辯護自己的觀點時，獲得一點英雄點。',
+      description: '當你的英雄在不合時宜的時刻強烈辯護自己的觀點時，獲得１點英雄點。',
     }
   },
   reunion: {
@@ -240,7 +240,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '怨懟',
-      description: '當你的英雄提起舊恨或不快往事，而這麼做將導致麻煩時，獲得一點英雄點。',
+      description: '當你的英雄提起舊恨或不快往事，而這麼做將導致麻煩時，獲得１點英雄點。',
     }
   },
   hero: {
@@ -253,7 +253,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '魯莽',
-      description: '當你的英雄因冒失、驕傲或魯莽的行為而使自己與他人陷入麻煩時，獲得一點英雄點。',
+      description: '當你的英雄因冒失、驕傲或魯莽的行為而使自己與他人陷入麻煩時，獲得１點英雄點。',
     }
   },
   glyph: {
@@ -266,7 +266,7 @@ export const arcanas: Record<string, Arcana> = {
     },
     hubris: {
       name: '迷信',
-      description: '當你拒絕使用巫術、神器或任何你不信任的神秘效應來解決問題時，獲得一點英雄點。',
+      description: '當你拒絕使用巫術、神器或任何你不信任的神秘效應來解決問題時，獲得１點英雄點。',
     }
   },
   emperor: {
@@ -275,11 +275,11 @@ export const arcanas: Record<string, Arcana> = {
     nameEn: 'The Emperor',
     virtue: {
       name: '威嚴',
-      description: '啟動你的美德，使遊戲主持人賦予場景中所有其他英雄各一點英雄點。',
+      description: '啟動你的美德，使遊戲主持人賦予場景中所有其他英雄各１點英雄點。',
     },
     hubris: {
       name: '暴躁',
-      description: '當你的英雄因憤怒而失控、發脾氣並造成麻煩時，獲得一點英雄點。',
+      description: '當你的英雄因憤怒而失控、發脾氣並造成麻煩時，獲得１點英雄點。',
     }
   }
 };

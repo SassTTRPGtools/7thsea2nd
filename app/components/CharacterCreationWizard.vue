@@ -583,7 +583,10 @@
             </div>
             <div class="p-3 bg-green-100 border-2 border-green-400 rounded-lg">
               <p class="text-sm text-green-900 font-semibold">
-                💡 提示：背景優勢是免費的，不會消耗你的 5 點購買額度。
+                💡 提示：背景優勢是免費的，不會消耗你的 5 點購買額度。                
+              </p>
+              <p class="text-sm text-green-900 font-semibold">                
+                標註 👤 的優勢只有在角色創建時可以選擇！
               </p>
             </div>
           </div>
@@ -1235,8 +1238,33 @@ const canSelectBackground = (bgKey: string): boolean => {
 
 const toggleBackground = (bg: Background) => {
   if (isBackgroundSelected(bg.key)) {
+    // 移除背景時，需要重新計算所有背景技能和優勢
     const index = characterStore.backgrounds.findIndex(b => b.key === bg.key);
+    
+    // 1. 記錄當前所有背景技能和優勢
+    const oldBackgroundSkills = [...creation.backgroundSkills.value];
+    const oldBackgroundAdvantages = [...creation.backgroundAdvantages.value];
+    
+    // 2. 移除背景
     characterStore.removeBackground(index);
+    
+    // 3. 清除所有舊背景技能（重置為0）
+    oldBackgroundSkills.forEach(skillKey => {
+      characterStore.setSkill(skillKey as any, 0);
+    });
+    
+    // 4. 移除所有舊背景優勢
+    oldBackgroundAdvantages.forEach(advKey => {
+      const advIndex = characterStore.advantages.findIndex(a => a.key === advKey);
+      if (advIndex !== -1) {
+        characterStore.removeAdvantage(advIndex);
+      }
+    });
+    
+    // 5. 重新應用剩餘背景的技能和優勢
+    creation.applyBackgroundSkills();
+    creation.applyBackgroundAdvantages();
+    
   } else if (characterStore.backgrounds.length < 2) {
     characterStore.addBackground(bg.key, bg.name);
     // 自動應用背景技能和優勢
@@ -1246,12 +1274,29 @@ const toggleBackground = (bg: Background) => {
 };
 
 const randomBackgrounds = () => {
-  // 清除現有背景
+  // 1. 先記錄當前背景提供的技能和優勢
+  const oldBackgroundSkills = [...creation.backgroundSkills.value];
+  const oldBackgroundAdvantages = [...creation.backgroundAdvantages.value];
+  
+  // 2. 清除現有背景
   while (characterStore.backgrounds.length > 0) {
     characterStore.removeBackground(0);
   }
   
-  // 從可用背景中隨機選擇 2 個
+  // 3. 清除所有舊背景技能（重置為0）
+  oldBackgroundSkills.forEach(skillKey => {
+    characterStore.setSkill(skillKey as any, 0);
+  });
+  
+  // 4. 移除所有舊背景優勢
+  oldBackgroundAdvantages.forEach(advKey => {
+    const index = characterStore.advantages.findIndex(a => a.key === advKey);
+    if (index !== -1) {
+      characterStore.removeAdvantage(index);
+    }
+  });
+  
+  // 5. 從可用背景中隨機選擇 2 個
   const availableBackgrounds = [...backgrounds.value];
   const selected: Background[] = [];
   
@@ -1264,12 +1309,12 @@ const randomBackgrounds = () => {
     availableBackgrounds.splice(randomIndex, 1);
   }
   
-  // 添加選中的背景
+  // 6. 添加選中的新背景
   selected.forEach(bg => {
     characterStore.addBackground(bg.key, bg.name);
   });
   
-  // 應用背景技能和優勢
+  // 7. 應用新背景的技能和優勢
   creation.applyBackgroundSkills();
   creation.applyBackgroundAdvantages();
 };
