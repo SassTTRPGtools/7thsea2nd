@@ -2,7 +2,7 @@
 #
 # To get started with Nuxt see: https://nuxtjs.org/docs/get-started/installation
 #
-name: Deploy Nuxt site to Pages
+name: Deploy 7th Sea 2nd Character Sheet to GitHub Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -52,19 +52,11 @@ jobs:
           echo "app/stores directory contents:"
           if [ -d "app/stores" ]; then
             ls -la app/stores/
-            echo "Checking achtungCthulhuStore.js exists:"
-            if [ -f "app/stores/achtungCthulhuStore.js" ]; then
-              echo "✓ achtungCthulhuStore.js found"
-              echo "First 5 lines of achtungCthulhuStore.js:"
-              head -5 app/stores/achtungCthulhuStore.js
+            echo "Checking characterStore.ts exists:"
+            if [ -f "app/stores/characterStore.ts" ]; then
+              echo "✓ characterStore.ts found"
             else
-              echo "✗ achtungCthulhuStore.js NOT found"
-            fi
-            echo "Checking cohorsCthvlhvStore.js exists:"
-            if [ -f "app/stores/cohorsCthvlhvStore.js" ]; then
-              echo "✓ cohorsCthvlhvStore.js found"
-            else
-              echo "✗ cohorsCthvlhvStore.js NOT found"
+              echo "✗ characterStore.ts NOT found"
             fi
           else
             echo "app/stores directory not found!"
@@ -72,13 +64,17 @@ jobs:
           echo "app/composables directory contents:"
           if [ -d "app/composables" ]; then
             ls -la app/composables/
-            echo "Checking useFVTTExport.js exists:"
-            if [ -f "app/composables/useFVTTExport.js" ]; then
-              echo "✓ useFVTTExport.js found"
-              echo "First 3 lines of useFVTTExport.js:"
-              head -3 app/composables/useFVTTExport.js
+            echo "Checking useCharacterCreation.ts exists:"
+            if [ -f "app/composables/useCharacterCreation.ts" ]; then
+              echo "✓ useCharacterCreation.ts found"
             else
-              echo "✗ useFVTTExport.js NOT found"
+              echo "✗ useCharacterCreation.ts NOT found"
+            fi
+            echo "Checking useGameData.ts exists:"
+            if [ -f "app/composables/useGameData.ts" ]; then
+              echo "✓ useGameData.ts found"
+            else
+              echo "✗ useGameData.ts NOT found"
             fi
           else
             echo "app/composables directory not found!"
@@ -87,7 +83,7 @@ jobs:
           if [ -d "app/data" ]; then
             ls -la app/data/
             echo "Checking data files:"
-            for file in archetypesAC.js backgroundsAC.js traitsAC.js; do
+            for file in nations.ts backgrounds.ts skills.ts advantages.ts arcanas.ts; do
               if [ -f "app/data/$file" ]; then
                 echo "✓ $file found"
               else
@@ -96,6 +92,31 @@ jobs:
             done
           else
             echo "app/data directory not found!"
+          fi
+          echo "app/pages directory contents:"
+          if [ -d "app/pages" ]; then
+            ls -la app/pages/
+            echo "Checking 2ndCharacter.vue exists:"
+            if [ -f "app/pages/2ndCharacter.vue" ]; then
+              echo "✓ 2ndCharacter.vue found"
+            else
+              echo "✗ 2ndCharacter.vue NOT found"
+            fi
+          else
+            echo "app/pages directory not found!"
+          fi
+          echo "app/components directory contents:"
+          if [ -d "app/components" ]; then
+            echo "Component files:"
+            ls -la app/components/
+          else
+            echo "app/components directory not found!"
+          fi
+          echo "public directory contents:"
+          if [ -d "public" ]; then
+            ls -la public/
+          else
+            echo "public directory not found!"
           fi
           echo "Checking nuxt.config.ts:"
           if [ -f "nuxt.config.ts" ]; then
