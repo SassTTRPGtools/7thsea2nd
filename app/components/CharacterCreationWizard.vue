@@ -183,7 +183,7 @@
               class="p-4 border-2 border-stone-300 rounded"
             >
               <div class="flex justify-between items-center mb-2">
-                <span class="font-bold">{{ getTraitLabel(trait) }} {{trait.description}}</span>
+                <span class="font-bold">{{ getTraitLabel(trait) }}</span>
                 <div class="flex items-center gap-2">
                   <span 
                     v-if="trait === characterStore.nationTraitBonus" 
@@ -281,13 +281,27 @@
               <div class="mb-2">
                 <p class="text-xs font-semibold text-green-700 mb-1">✨ 優勢</p>
                 <div class="flex flex-wrap gap-1">
-                  <span
+                  <div
                     v-for="advKey in bg.advantages"
                     :key="advKey"
-                    class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
+                    class="relative group"
                   >
-                    {{ getAdvantageName(advKey) }}
-                  </span>
+                    <span
+                      class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded cursor-help inline-block"
+                    >
+                      {{ getAdvantageName(advKey) }}
+                    </span>
+                    <!-- Tooltip -->
+                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                      <div class="font-bold mb-1">{{ getAdvantageName(advKey) }}</div>
+                      <div class="text-gray-300 mb-1">成本: {{ getAdvantageCost(advKey) }} 點</div>
+                      <div class="leading-relaxed">{{ getAdvantageDescription(advKey) }}</div>
+                      <!-- 小三角形 -->
+                      <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                        <div class="border-8 border-transparent border-t-gray-900"></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -378,7 +392,29 @@ const currentStep = ref(1);
 const stepTitles = ['國家', '屬性', '背景', '技能', '優勢', '阿爾克那'];
 
 const nations = getNations();
-const backgrounds = getBackgrounds();
+const allBackgrounds = getBackgrounds();
+
+// 根據所選國家篩選背景
+const backgrounds = computed(() => {
+  if (!characterStore.nation) return allBackgrounds.filter(bg => bg.category === 'basic');
+  
+  // 國家 key 到背景分類的映射
+  const nationToCategoryMap: Record<string, Background['category'][]> = {
+    avalon: ['basic', 'glamourIsles', 'avalon'],
+    inismore: ['basic', 'glamourIsles', 'inismore'],
+    highlandMarches: ['basic', 'glamourIsles', 'highlandMarches'],
+    castille: ['basic', 'castille'],
+    eisen: ['basic', 'eisen'],
+    montaigne: ['basic', 'montaigne'],
+    sarmatianCommonwealth: ['basic', 'sarmatian'],
+    ussura: ['basic', 'ussura'],
+    vestenmennavenjar: ['basic', 'vesten'],
+    vodacce: ['basic', 'vodacce']
+  };
+  
+  const allowedCategories = nationToCategoryMap[characterStore.nation] || ['basic'];
+  return allBackgrounds.filter(bg => allowedCategories.includes(bg.category));
+});
 
 // 載入已保存的角色資料
 onMounted(() => {
@@ -430,6 +466,14 @@ const getSkillName = (skillKey: string): string => {
 
 const getAdvantageName = (advantageKey: string): string => {
   return advantages[advantageKey]?.name || advantageKey;
+};
+
+const getAdvantageCost = (advantageKey: string): number => {
+  return advantages[advantageKey]?.cost || 0;
+};
+
+const getAdvantageDescription = (advantageKey: string): string => {
+  return advantages[advantageKey]?.description || '';
 };
 
 const selectNation = (nationKey: string) => {
