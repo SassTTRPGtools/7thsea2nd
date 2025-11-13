@@ -55,7 +55,7 @@
 
       <!-- Death Spiral 圖片 -->
       <div class="relative mx-auto" style="width: 280px; height: 280px;">
-        <img src="/death_spiral.png" alt="Death Spiral" 
+        <img src="/death_spiral.webp" alt="Death Spiral" 
              class="w-full h-full object-contain opacity-70" />
         
         <!-- 疊加的圓圈 -->

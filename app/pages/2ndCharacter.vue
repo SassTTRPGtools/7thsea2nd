@@ -2,16 +2,24 @@
   <div class="min-h-screen relative bg-gradient-to-br from-stone-200 via-stone-100 to-stone-300">
     <!-- 背景圖片 -->
     <div class="fixed inset-0 opacity-10 bg-cover bg-center pointer-events-none"
-         :style="{ backgroundImage: `url(/sheet_background.jpg)` }">
+         :style="{ backgroundImage: `url(/sheet_background.webp)` }">
     </div>
 
     <!-- 主要內容 -->
     <div class="relative z-10 max-w-[1600px] mx-auto p-4 md:p-8">
       <!-- 頂部 Logo 和操作按鈕 -->
       <div class="flex justify-between items-center mb-6">
-        <img src="/logo.png" alt="7th Sea" class="h-16 md:h-20 drop-shadow-lg opacity-80" />
+        <img src="/logo.webp" alt="7th Sea" class="h-16 md:h-20 drop-shadow-lg opacity-80" />
         
         <div class="flex gap-2 md:gap-3">
+          <button v-if="!showCreationWizard" @click="toggleCreationWizard" 
+                  class="px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded shadow-md transition-all text-sm md:text-base font-semibold">
+            角色創建嚮導
+          </button>
+          <button v-if="showCreationWizard" @click="toggleCreationWizard" 
+                  class="px-4 py-2 bg-stone-600 hover:bg-stone-500 text-white rounded shadow-md transition-all text-sm md:text-base font-semibold">
+            返回角色表
+          </button>
           <button @click="exportCharacter" 
                   class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded shadow-md transition-all text-sm md:text-base font-semibold">
             匯出
@@ -27,8 +35,11 @@
         </div>
       </div>
 
+      <!-- 角色創建嚮導 -->
+      <CharacterCreationWizard v-if="showCreationWizard" />
+
       <!-- 三欄佈局 -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         <!-- 左欄 -->
         <div class="space-y-4 md:space-y-6">
           <CharacterInfo />
@@ -54,9 +65,20 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import { useCharacterStore } from '~/stores/characterStore';
 
 const characterStore = useCharacterStore();
+const showCreationWizard = ref(false);
+
+// 頁面載入時從 localStorage 載入角色資料
+onMounted(() => {
+  characterStore.loadFromLocalStorage();
+});
+
+const toggleCreationWizard = () => {
+  showCreationWizard.value = !showCreationWizard.value;
+};
 
 const exportCharacter = () => {
   const json = characterStore.exportCharacter();
@@ -99,4 +121,3 @@ const resetCharacter = () => {
   }
 };
 </script>
-
