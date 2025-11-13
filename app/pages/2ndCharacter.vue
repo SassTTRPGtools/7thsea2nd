@@ -7,32 +7,53 @@
 
     <!-- 主要內容 -->
     <div class="relative z-10 max-w-[1600px] mx-auto p-4 md:p-8">
-      <!-- 頂部 Logo 和操作按鈕 -->
-      <div class="flex justify-between items-center mb-6">
-        <img src="/logo.webp" alt="7th Sea" class="h-16 md:h-20 drop-shadow-lg opacity-80" />
-        
-        <div class="flex gap-2 md:gap-3">
-          <button v-if="!showCreationWizard" @click="toggleCreationWizard" 
-                  class="px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded shadow-md transition-all text-sm md:text-base font-semibold">
+      <!-- 頂部 Logo（置中） -->
+      <div class="flex justify-center items-center mb-6">
+        <img src="/logo.webp" alt="7th Sea" class="h-24 md:h-28 drop-shadow-lg opacity-80" />
+      </div>
+
+      <!-- 右側浮動操作按鈕 -->
+      <div class="fixed right-4 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3">
+        <button v-if="!showCreationWizard" @click="toggleCreationWizard" 
+                class="w-14 h-14 bg-blue-700 hover:bg-blue-600 text-white rounded-full shadow-lg transition-all flex items-center justify-center group relative"
+                title="角色創建嚮導">
+          <span class="text-2xl">✨</span>
+          <span class="absolute right-full mr-3 bg-gray-900 text-white text-xs px-3 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
             角色創建嚮導
-          </button>
-          <button v-if="showCreationWizard" @click="toggleCreationWizard" 
-                  class="px-4 py-2 bg-stone-600 hover:bg-stone-500 text-white rounded shadow-md transition-all text-sm md:text-base font-semibold">
+          </span>
+        </button>
+        <button v-if="showCreationWizard" @click="toggleCreationWizard" 
+                class="w-14 h-14 bg-stone-600 hover:bg-stone-500 text-white rounded-full shadow-lg transition-all flex items-center justify-center group relative"
+                title="返回角色表">
+          <span class="text-2xl">📋</span>
+          <span class="absolute right-full mr-3 bg-gray-900 text-white text-xs px-3 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
             返回角色表
-          </button>
-          <button @click="exportCharacter" 
-                  class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded shadow-md transition-all text-sm md:text-base font-semibold">
-            匯出
-          </button>
-          <button @click="importCharacter" 
-                  class="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-white rounded shadow-md transition-all text-sm md:text-base font-semibold">
-            匯入
-          </button>
-          <button @click="resetCharacter" 
-                  class="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded shadow-md transition-all text-sm md:text-base font-semibold">
-            重置
-          </button>
-        </div>
+          </span>
+        </button>
+        <button @click="exportCharacter" 
+                class="w-14 h-14 bg-emerald-700 hover:bg-emerald-600 text-white rounded-full shadow-lg transition-all flex items-center justify-center group relative"
+                title="匯出角色">
+          <span class="text-2xl">💾</span>
+          <span class="absolute right-full mr-3 bg-gray-900 text-white text-xs px-3 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            匯出角色
+          </span>
+        </button>
+        <button @click="importCharacter" 
+                class="w-14 h-14 bg-indigo-700 hover:bg-indigo-600 text-white rounded-full shadow-lg transition-all flex items-center justify-center group relative"
+                title="匯入角色">
+          <span class="text-2xl">📂</span>
+          <span class="absolute right-full mr-3 bg-gray-900 text-white text-xs px-3 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            匯入角色
+          </span>
+        </button>
+        <button @click="resetCharacter" 
+                class="w-14 h-14 bg-red-700 hover:bg-red-600 text-white rounded-full shadow-lg transition-all flex items-center justify-center group relative"
+                title="重置角色">
+          <span class="text-2xl">🗑️</span>
+          <span class="absolute right-full mr-3 bg-gray-900 text-white text-xs px-3 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            重置角色
+          </span>
+        </button>
       </div>
 
       <!-- 角色創建嚮導 -->

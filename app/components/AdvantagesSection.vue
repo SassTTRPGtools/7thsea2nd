@@ -19,17 +19,8 @@
               <div class="text-xs text-gray-600 leading-relaxed">
                 {{ getAdvantage(advKey)?.description }}
               </div>
-              <div v-if="getAdvantage(advKey)?.conditionalCost && getAdvantage(advKey)!.conditionalCost!.length > 0" 
-                   class="mt-2 text-xs text-blue-700">
-                <div v-for="(cond, idx) in getAdvantage(advKey)!.conditionalCost" :key="idx">
-                  💰 {{ getNationName(cond.nation) }}: {{ cond.reducedCost }} 點 ({{ cond.condition || '國籍折扣' }})
-                </div>
-              </div>
             </div>
             <div class="ml-3 flex flex-col items-end gap-2">
-              <div class="px-2 py-1 bg-amber-400 text-amber-900 rounded text-xs font-bold whitespace-nowrap">
-                {{ getAdvantageCost(advKey) }} 點
-              </div>
               <button @click.stop="removeAdvantage(advKey)" 
                       class="px-2 py-1 bg-red-700 hover:bg-red-600 text-white rounded text-xs">
                 ✕
