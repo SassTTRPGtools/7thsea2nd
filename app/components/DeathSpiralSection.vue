@@ -8,12 +8,48 @@
       <!-- 傷勢等級說明 -->
       <div class="grid grid-cols-2 gap-2 mb-4 text-xs">
         <div class="space-y-1">
-          <div class="font-semibold text-gray-700">1: 所有檢定 +1 額外骰數</div>
-          <div class="font-semibold text-gray-700">2: 反派 +2 額外骰數</div>
+          <div 
+            :class="[
+              'font-semibold p-1 rounded transition-all',
+              characterStore.markedDramaticWounds >= 5 
+                ? 'bg-yellow-200 text-yellow-900 border-2 border-yellow-600' 
+                : 'text-gray-700'
+            ]"
+          >
+            5+ 傷勢: 所有檢定 +1 額外骰數
+          </div>
+          <div 
+            :class="[
+              'font-semibold p-1 rounded transition-all',
+              characterStore.markedDramaticWounds >= 10 
+                ? 'bg-orange-200 text-orange-900 border-2 border-orange-600' 
+                : 'text-gray-700'
+            ]"
+          >
+            10+ 傷勢: 反派 +2 額外骰數
+          </div>
         </div>
         <div class="space-y-1">
-          <div class="font-semibold text-gray-700">3: 啟動 10 爆炸骰 (額外骰一顆)</div>
-          <div class="font-semibold text-gray-700">4: 你陷入無助</div>
+          <div 
+            :class="[
+              'font-semibold p-1 rounded transition-all',
+              characterStore.markedDramaticWounds >= 15 
+                ? 'bg-red-200 text-red-900 border-2 border-red-600' 
+                : 'text-gray-700'
+            ]"
+          >
+            15+ 傷勢: 啟動 10 爆炸骰 (額外骰一顆)
+          </div>
+          <div 
+            :class="[
+              'font-semibold p-1 rounded transition-all',
+              characterStore.markedDramaticWounds >= 20 
+                ? 'bg-red-700 text-white border-2 border-red-900 animate-pulse' 
+                : 'text-gray-700'
+            ]"
+          >
+            20 傷勢: 你陷入無助
+          </div>
         </div>
       </div>
 
@@ -27,82 +63,47 @@
           <button
             v-for="n in 20"
             :key="n"
-            @click="(e) => handleCircleClick(e, n - 1)"
+            @click="handleCircleClick(n - 1)"
             :class="[
-              'absolute w-6 h-6 rounded-full border-2 transition-all',
-              characterStore.deathSpiral.dramaticWounds[n - 1]
-                ? 'bg-red-700 border-red-900'
-                : 'bg-white bg-opacity-60 border-gray-600 hover:border-red-700'
+              'absolute w-6 h-6 wound-mark rounded-full',
+              getWoundLevelClass(n)
             ]"
             :style="getCirclePosition(n - 1)"
-            :title="debugMode ? `圓圈 ${n - 1}` : ''"
           >
+            <span v-if="characterStore.deathSpiral.dramaticWounds[n - 1]" class="slash-mark"></span>
           </button>
         </div>
-
-        <!-- 中心傷勢等級 -->
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div class="text-6xl font-bold text-red-900 drop-shadow-lg">
-            {{ characterStore.deathSpiral.currentWounds }}
-          </div>
-        </div>
       </div>
-
-      <!-- 傷勢控制 -->
-      <div class="mt-4 flex justify-center gap-2">
-        <button
-          v-for="n in 5"
-          :key="n - 1"
-          @click="setWounds(n - 1)"
-          :class="[
-            'w-10 h-10 rounded-full border-2 font-bold transition-all',
-            (n - 1) === characterStore.deathSpiral.currentWounds
-              ? 'bg-red-900 border-red-900 text-white'
-              : 'bg-white border-gray-400 text-gray-700 hover:border-red-700'
-          ]"
-        >
-          {{ n - 1 }}
-        </button>
-      </div>
-
       <div v-if="characterStore.isHelpless" 
            class="mt-3 text-center text-red-700 font-bold text-sm animate-pulse">
         ⚠️ 角色已無助！
-      </div>
-
-      <div class="mt-3 text-center text-xs text-gray-600">
-        已標記: {{ characterStore.markedDramaticWounds }} / 20
-      </div>
-
-      <!-- 調試模式開關 -->
-      <div class="mt-2 text-center">
-        <button
-          @click="debugMode = !debugMode"
-          class="text-xs text-gray-400 hover:text-gray-600 underline"
-        >
-          {{ debugMode ? '關閉' : '開啟' }}調試模式
-        </button>
-        <div v-if="debugMode" class="mt-2 text-xs text-gray-500">
-          💡 按住 Ctrl + 點擊圓圈可在控制台顯示座標
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useCharacterStore } from '~/stores/characterStore';
 
 const characterStore = useCharacterStore();
-const debugMode = ref(false); // 設為 true 可以看到座標資訊
 
 const setWounds = (level: number) => {
   characterStore.setCurrentWounds(level);
 };
 
-const toggleDramaticWound = (index: number) => {
-  characterStore.toggleDramaticWound(index);
+// 根據傷勢圓圈編號返回對應的高亮樣式
+const getWoundLevelClass = (n: number) => {
+  // 只有在圓圈是 5, 10, 15, 20 時才高亮
+  if (n === 5) {
+    return 'border-2 border-yellow-500 bg-yellow-100';
+  } else if (n === 10) {
+    return 'border-2 border-orange-500 bg-orange-100';
+  } else if (n === 15) {
+    return 'border-2 border-red-500 bg-red-100';
+  } else if (n === 20) {
+    return 'border-2 border-red-700 bg-red-200';
+  }
+  return 'border-2 border-blue-500 bg-blue-200 bg-opacity-50';
 };
 
 // 根據圖片實際位置的精確座標（以百分比表示）
@@ -149,17 +150,111 @@ const getCirclePosition = (index: number) => {
   };
 };
 
-// 開發用：按住 Ctrl+點擊可以顯示座標（用於調整）
-const handleCircleClick = (event: MouseEvent, index: number) => {
-  if (event.ctrlKey && debugMode.value) {
-    const target = event.currentTarget as HTMLElement;
-    const parent = target.parentElement as HTMLElement;
-    const rect = parent.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width * 100).toFixed(1);
-    const y = ((event.clientY - rect.top) / rect.height * 100).toFixed(1);
-    console.log(`圓圈 ${index}: { left: ${x}, top: ${y} }`);
+// 點擊圓圈處理：連續選擇邏輯
+// 點選第 N 個時，0 到 N 都會被選中
+// 點選比當前更前面的，則會清除後面的選擇
+const handleCircleClick = (index: number) => {
+  const wounds = characterStore.deathSpiral.dramaticWounds;
+  
+  // 如果點擊的這個圓圈已經被選中
+  if (wounds[index]) {
+    // 檢查是否有比它更後面的被選中
+    const hasLaterSelected = wounds.slice(index + 1).some(w => w);
+    
+    if (hasLaterSelected) {
+      // 如果有更後面的被選中，清除 index+1 之後的所有選擇
+      for (let i = index + 1; i < 20; i++) {
+        if (wounds[i]) {
+          characterStore.toggleDramaticWound(i);
+        }
+      }
+    } else {
+      // 如果沒有更後面的，則取消當前這個（和之前的連續選擇）
+      // 從後往前找到第一個未被選中的位置
+      let lastSelected = index;
+      for (let i = index; i >= 0; i--) {
+        if (!wounds[i]) {
+          break;
+        }
+        lastSelected = i;
+      }
+      // 取消從 lastSelected 到 index 的選擇
+      for (let i = lastSelected; i <= index; i++) {
+        if (wounds[i]) {
+          characterStore.toggleDramaticWound(i);
+        }
+      }
+    }
   } else {
-    toggleDramaticWound(index);
+    // 如果點擊的圓圈還沒被選中，選中從 0 到 index 的所有圓圈
+    for (let i = 0; i <= index; i++) {
+      if (!wounds[i]) {
+        characterStore.toggleDramaticWound(i);
+      }
+    }
   }
 };
 </script>
+
+<style scoped>
+/* 傷勢按鈕基礎樣式 - 透明無背景 */
+.wound-mark {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+/* 刀劃痕跡效果 */
+.slash-mark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.slash-mark::before,
+.slash-mark::after {
+  content: '';
+  position: absolute;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(139, 0, 0, 0.9) 20%,
+    rgba(185, 28, 28, 1) 50%,
+    rgba(139, 0, 0, 0.9) 80%,
+    transparent 100%
+  );
+  box-shadow: 
+    0 0 3px rgba(220, 38, 38, 0.9),
+    0 0 6px rgba(185, 28, 28, 0.6);
+}
+
+/* 主要斜線 - 從左上到右下 */
+.slash-mark::before {
+  width: 160%;
+  height: 2.5px;
+  transform: rotate(-45deg);
+  animation: slashAppear 0.25s ease-out;
+}
+
+/* 次要斜線 - 從右上到左下 */
+.slash-mark::after {
+  width: 140%;
+  height: 2px;
+  transform: rotate(45deg);
+  opacity: 0.7;
+  animation: slashAppear 0.3s ease-out;
+}
+
+/* 刀劃出現動畫 */
+@keyframes slashAppear {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+</style>
