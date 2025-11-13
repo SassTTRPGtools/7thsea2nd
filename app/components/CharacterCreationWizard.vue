@@ -925,6 +925,7 @@ import { getBackgrounds, type Background, categoryNames } from '~/data/backgroun
 import { skills, getSkills } from '~/data/skills';
 import { advantages, getAdvantages, getAdvantageActualCost as getActualCost, type Advantage } from '~/data/advantages';
 import { getArcanas, type Arcana } from '~/data/arcanas';
+import { getAssetUrl } from '~/composables/useAssetUrl';
 
 // 定義 emit 事件
 const emit = defineEmits<{
@@ -1030,21 +1031,19 @@ const selectedNation = computed(() => {
 
 // 獲取國家圖片路徑
 const getNationImage = (nationKey: string): string => {
-  // 移到 public 資料夾的圖片可以直接用 /path 存取
-  // 或者從 assets 引入需要使用 import
   const imageMap: Record<string, string> = {
-    avalon: '/nations/Avalon.webp',
-    inismore: '/nations/Inismore.webp',
-    highlandMarches: '/nations/The Highland Marches.webp',
-    castille: '/nations/Castille.webp',
-    eisen: '/nations/Eisen.webp',
-    montaigne: '/nations/Montaigne.webp',
-    sarmatianCommonwealth: '/nations/The Sarmatian.webp',
-    ussura: '/nations/Ussura.webp',
-    vestenmennavenjar: '/nations/Vestenmennavenjar.webp',
-    vodacce: '/nations/Vodacce.webp'
+    avalon: getAssetUrl('/nations/Avalon.webp'),
+    inismore: getAssetUrl('/nations/Inismore.webp'),
+    highlandMarches: getAssetUrl('/nations/The Highland Marches.webp'),
+    castille: getAssetUrl('/nations/Castille.webp'),
+    eisen: getAssetUrl('/nations/Eisen.webp'),
+    montaigne: getAssetUrl('/nations/Montaigne.webp'),
+    sarmatianCommonwealth: getAssetUrl('/nations/The Sarmatian.webp'),
+    ussura: getAssetUrl('/nations/Ussura.webp'),
+    vestenmennavenjar: getAssetUrl('/nations/Vestenmennavenjar.webp'),
+    vodacce: getAssetUrl('/nations/Vodacce.webp')
   };
-  return imageMap[nationKey] || '/logo.png';
+  return imageMap[nationKey] || getAssetUrl('/logo.png');
 };
 
 const getTraitLabel = (trait: string): string => {

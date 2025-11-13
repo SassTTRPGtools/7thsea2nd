@@ -2,14 +2,14 @@
   <div class="min-h-screen relative bg-gradient-to-br from-stone-200 via-stone-100 to-stone-300">
     <!-- 背景圖片 -->
     <div class="fixed inset-0 opacity-10 bg-cover bg-center pointer-events-none"
-         style="background-image: url('/sheet_background.webp')">
+         :style="`background-image: url('${getAssetUrl('/sheet_background.webp')}')`">
     </div>
 
     <!-- 主要內容 -->
     <div class="relative z-10 max-w-[1600px] mx-auto p-4 md:p-8">
       <!-- 頂部 Logo（置中） -->
       <div class="flex justify-center items-center mb-6">
-        <img src="/logo.webp" alt="7th Sea" class="h-24 md:h-28 drop-shadow-lg opacity-80" />
+        <img :src="getAssetUrl('/logo.webp')" alt="7th Sea" class="h-24 md:h-28 drop-shadow-lg opacity-80" />
       </div>
 
       <!-- 右側浮動操作按鈕 -->
@@ -88,6 +88,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useCharacterStore } from '~/stores/characterStore';
+import { getAssetUrl } from '~/composables/useAssetUrl';
 
 const characterStore = useCharacterStore();
 const showCreationWizard = ref(false);
