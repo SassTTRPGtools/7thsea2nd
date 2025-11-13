@@ -223,28 +223,113 @@
         <!-- 步驟 3: 背景選擇 -->
         <div v-else-if="currentStep === 3">
           <h2 class="text-xl font-bold mb-4 text-red-900">步驟 3: 選擇背景</h2>
-          <p class="text-gray-700 mb-6">
+          <p class="text-gray-700 mb-4">
             為你的英雄選擇<span class="font-bold text-red-700">兩個背景</span>，並獲得這些背景列出的所有優勢與技能（等級 1）。
           </p>
 
-          <!-- 已選背景 -->
-          <div v-if="characterStore.backgrounds.length > 0" class="mb-6">
-            <h3 class="font-semibold mb-2">已選擇的背景:</h3>
-            <div class="flex gap-2">
+          <!-- 隨機選擇按鈕 -->
+          <div class="mb-4">
+            <button
+              @click="randomBackgrounds"
+              class="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all shadow-md flex items-center gap-2"
+            >
+              🎲 隨機選擇背景
+            </button>
+          </div>
+
+          <!-- 已選背景 - 完整卡片顯示 -->
+          <div v-if="getSelectedBackgrounds.length > 0" class="mb-6">
+            <h3 class="font-bold text-lg mb-4 text-red-900 flex items-center gap-2">
+              ✓ 已選擇的背景 ({{ getSelectedBackgrounds.length }}/2)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div
-                v-for="(bg, index) in characterStore.backgrounds"
+                v-for="(bg, index) in getSelectedBackgrounds"
                 :key="bg.key"
-                class="px-4 py-2 bg-red-700 text-white rounded flex items-center gap-2"
+                class="p-4 border-4 border-red-700 bg-red-50 rounded-lg shadow-lg relative"
               >
-                <span>{{ bg.name }}</span>
+                <!-- 刪除按鈕 -->
                 <button
                   @click="characterStore.removeBackground(index)"
-                  class="text-white hover:text-red-200"
+                  class="absolute top-2 right-2 w-8 h-8 bg-red-700 text-white rounded-full hover:bg-red-800 font-bold text-lg flex items-center justify-center shadow-md transition-all"
+                  title="移除此背景"
                 >
                   ✕
                 </button>
+
+                <!-- 標題和類別 -->
+                <div class="flex justify-between items-start mb-3 pr-8">
+                  <h4 class="font-bold text-xl text-red-900">{{ bg.name }}</h4>
+                  <span class="text-xs bg-red-200 text-red-900 px-3 py-1 rounded font-semibold">
+                    {{ getCategoryLabel(bg.category) }}
+                  </span>
+                </div>
+                
+                <!-- 描述 -->
+                <p class="text-sm text-gray-700 mb-4 leading-relaxed">{{ bg.description }}</p>
+                
+                <!-- 癖性 -->
+                <div class="mb-4 p-3 bg-yellow-50 rounded-lg border-2 border-yellow-300">
+                  <p class="text-sm font-bold text-yellow-900 mb-2 flex items-center gap-2">
+                    🎭 癖性
+                  </p>
+                  <p class="text-sm text-yellow-800 leading-relaxed">{{ bg.quirk }}</p>
+                </div>
+                
+                <!-- 優勢 -->
+                <div class="mb-4">
+                  <p class="text-sm font-bold text-green-800 mb-2 flex items-center gap-2">
+                    ✨ 優勢
+                  </p>
+                  <div class="flex flex-wrap gap-2">
+                    <div
+                      v-for="advKey in bg.advantages"
+                      :key="advKey"
+                      class="relative group"
+                    >
+                      <span
+                        class="text-sm bg-green-200 text-green-900 px-3 py-1 rounded-lg cursor-help inline-block font-semibold border-2 border-green-300"
+                      >
+                        {{ getAdvantageName(advKey) }}
+                      </span>
+                      <!-- Tooltip -->
+                      <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                        <div class="font-bold mb-1">{{ getAdvantageName(advKey) }}</div>
+                        <div class="text-gray-300 mb-1">成本: {{ getAdvantageCost(advKey) }} 點</div>
+                        <div class="leading-relaxed">{{ getAdvantageDescription(advKey) }}</div>
+                        <!-- 小三角形 -->
+                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                          <div class="border-8 border-transparent border-t-gray-900"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- 技能 -->
+                <div>
+                  <p class="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
+                    🎯 技能
+                  </p>
+                  <div class="flex flex-wrap gap-2">
+                    <span
+                      v-for="skillKey in bg.skills"
+                      :key="skillKey"
+                      class="text-sm bg-blue-200 text-blue-900 px-3 py-1 rounded-lg font-semibold border-2 border-blue-300"
+                    >
+                      {{ getSkillName(skillKey) }}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+
+          <!-- 可選背景列表標題 -->
+          <div v-if="getSelectedBackgrounds.length < 2" class="mb-4">
+            <h3 class="font-bold text-lg text-gray-700">
+              {{ getSelectedBackgrounds.length === 0 ? '選擇背景' : '選擇第二個背景' }}
+            </h3>
           </div>
 
           <!-- 背景列表 -->
@@ -1036,6 +1121,41 @@ const toggleBackground = (bg: Background) => {
     creation.applyBackgroundAdvantages();
   }
 };
+
+const randomBackgrounds = () => {
+  // 清除現有背景
+  while (characterStore.backgrounds.length > 0) {
+    characterStore.removeBackground(0);
+  }
+  
+  // 從可用背景中隨機選擇 2 個
+  const availableBackgrounds = [...backgrounds.value];
+  const selected: Background[] = [];
+  
+  while (selected.length < 2 && availableBackgrounds.length > 0) {
+    const randomIndex = Math.floor(Math.random() * availableBackgrounds.length);
+    const randomBg = availableBackgrounds[randomIndex];
+    if (randomBg) {
+      selected.push(randomBg);
+    }
+    availableBackgrounds.splice(randomIndex, 1);
+  }
+  
+  // 添加選中的背景
+  selected.forEach(bg => {
+    characterStore.addBackground(bg.key, bg.name);
+  });
+  
+  // 應用背景技能和優勢
+  creation.applyBackgroundSkills();
+  creation.applyBackgroundAdvantages();
+};
+
+const getSelectedBackgrounds = computed(() => {
+  return characterStore.backgrounds
+    .map(bg => allBackgrounds.find(b => b.key === bg.key))
+    .filter(bg => bg !== undefined) as Background[];
+});
 
 const isStepComplete = (step: number): boolean => {
   switch (step) {
