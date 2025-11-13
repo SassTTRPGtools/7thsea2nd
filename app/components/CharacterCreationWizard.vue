@@ -517,51 +517,112 @@
             你有 <span class="font-bold text-red-700">5 點</span>可購買新的優勢。你只能購買你符合資格的優勢。
           </p>
 
-          <!-- 背景優勢說明 -->
-          <div v-if="creation.backgroundAdvantages.value.length > 0" class="mb-6 p-4 bg-green-50 border-2 border-green-400 rounded-lg">
-            <h3 class="font-bold text-green-900 mb-2 flex items-center gap-2">
-              <span class="text-xl">🎁</span> 
-              背景優勢（免費獲得）
+          <!-- 背景優勢 - 完整卡片顯示 -->
+          <div v-if="backgroundAdvantagesDetails.length > 0" class="mb-6">
+            <h3 class="font-bold text-lg mb-4 text-green-900 flex items-center gap-2">
+              🎁 背景優勢（免費獲得，共 {{ backgroundAdvantagesDetails.length }} 個）
             </h3>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="advKey in creation.backgroundAdvantages.value"
-                :key="advKey"
-                class="px-3 py-1 bg-green-600 text-white rounded-lg text-sm font-semibold"
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div
+                v-for="advantage in backgroundAdvantagesDetails"
+                :key="advantage.key"
+                class="p-4 border-4 border-green-600 bg-green-50 rounded-lg shadow-lg"
               >
-                {{ getAdvantageName(advKey) }}
-              </span>
+                <!-- 優勢標題 -->
+                <div class="flex justify-between items-start mb-3">
+                  <div class="flex-1">
+                    <h4 class="font-bold text-xl text-green-900 flex items-center gap-2">
+                      {{ advantage.name }}
+                      <span v-if="advantage.isHeroPoint" class="text-yellow-600 text-lg" title="需要消耗英雄點啟用">★</span>
+                      <span v-if="advantage.isPersonal" class="text-blue-600 text-lg" title="個人特質">👤</span>
+                    </h4>
+                  </div>
+                  <div class="flex flex-col items-end gap-1">
+                    <span class="px-3 py-1 bg-green-700 text-white rounded-lg font-bold text-sm">
+                      免費
+                    </span>
+                    <span class="text-xs text-green-700 font-semibold">
+                      原價 {{ advantage.cost }} 點
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 優勢說明 -->
+                <p class="text-sm text-gray-700 leading-relaxed">{{ advantage.description }}</p>
+              </div>
             </div>
-            <p class="text-xs text-green-800 mt-2">
-              💡 提示：背景優勢是免費的，不會消耗你的 5 點購買額度。
-            </p>
+            <div class="p-3 bg-green-100 border-2 border-green-400 rounded-lg">
+              <p class="text-sm text-green-900 font-semibold">
+                💡 提示：背景優勢是免費的，不會消耗你的 5 點購買額度。
+              </p>
+            </div>
           </div>
 
-          <!-- 已購買優勢 -->
-          <div v-if="purchasedAdvantages.length > 0" class="mb-6">
-            <h3 class="font-semibold mb-2">已購買的優勢:</h3>
-            <div class="flex flex-wrap gap-2">
+          <!-- 已購買優勢 - 完整卡片顯示 -->
+          <div v-if="purchasedAdvantagesDetails.length > 0" class="mb-6">
+            <h3 class="font-bold text-lg mb-4 text-red-900 flex items-center gap-2">
+              ✓ 已購買的優勢（共 {{ purchasedAdvantagesDetails.length }} 個）
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div
-                v-for="adv in purchasedAdvantages"
-                :key="adv.key"
-                class="px-4 py-2 bg-red-700 text-white rounded-lg flex items-center gap-2"
+                v-for="advantage in purchasedAdvantagesDetails"
+                :key="advantage.key"
+                class="p-4 border-4 border-red-700 bg-red-50 rounded-lg shadow-lg relative"
               >
-                <span>{{ adv.name }} ({{ getAdvantageActualCost(adv.key) }} 點)</span>
+                <!-- 刪除按鈕 -->
                 <button
-                  @click="removeAdvantage(adv.key)"
-                  class="text-white hover:text-red-200 font-bold"
+                  @click="removeAdvantage(advantage.key)"
+                  class="absolute top-2 right-2 w-8 h-8 bg-red-700 text-white rounded-full hover:bg-red-800 font-bold text-lg flex items-center justify-center shadow-md transition-all"
+                  title="退還此優勢"
                 >
                   ✕
                 </button>
+
+                <!-- 優勢標題 -->
+                <div class="flex justify-between items-start mb-3 pr-8">
+                  <div class="flex-1">
+                    <h4 class="font-bold text-xl text-red-900 flex items-center gap-2">
+                      {{ advantage.name }}
+                      <span v-if="advantage.isHeroPoint" class="text-yellow-600 text-lg" title="需要消耗英雄點啟用">★</span>
+                      <span v-if="advantage.isPersonal" class="text-blue-600 text-lg" title="個人特質">👤</span>
+                    </h4>
+                  </div>
+                  <div class="flex flex-col items-end gap-1">
+                    <span class="px-3 py-1 bg-red-700 text-white rounded-lg font-bold text-sm">
+                      {{ getAdvantageActualCost(advantage.key) }} 點
+                    </span>
+                    <span v-if="getAdvantageActualCost(advantage.key) < advantage.cost" class="text-xs text-green-700 font-semibold">
+                      原價 {{ advantage.cost }} 點
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 優勢說明 -->
+                <p class="text-sm text-gray-700 leading-relaxed">{{ advantage.description }}</p>
+
+                <!-- 折扣說明 -->
+                <div v-if="advantage.conditionalCost && hasDiscount(advantage)" class="mt-3 text-xs font-semibold text-green-700 bg-green-100 px-3 py-2 rounded-lg border border-green-300">
+                  💰 {{ getDiscountReason(advantage) }}
+                </div>
               </div>
             </div>
           </div>
 
-          <p class="text-sm text-gray-600 mb-4">
-            剩餘點數: <span class="font-bold text-lg" :class="creation.availableAdvantagePoints.value === 0 ? 'text-green-700' : 'text-red-700'">
-              {{ creation.availableAdvantagePoints.value }}
-            </span>
-          </p>
+          <!-- 點數顯示 -->
+          <div class="mb-6 p-4 bg-stone-100 border-2 border-stone-300 rounded-lg">
+            <p class="text-base text-gray-700">
+              剩餘點數: <span class="font-bold text-2xl ml-2" :class="creation.availableAdvantagePoints.value === 0 ? 'text-green-700' : 'text-red-700'">
+                {{ creation.availableAdvantagePoints.value }}
+              </span> / 5
+            </p>
+          </div>
+
+          <!-- 可選優勢列表標題 -->
+          <div class="mb-4">
+            <h3 class="font-bold text-lg text-gray-700">
+              可購買的優勢
+            </h3>
+          </div>
 
           <!-- 成本篩選器 -->
           <div class="mb-6 flex items-center gap-3">
@@ -873,6 +934,20 @@ const purchasedAdvantages = computed(() => {
   );
 });
 
+// 獲取背景優勢的完整資訊
+const backgroundAdvantagesDetails = computed(() => {
+  return creation.backgroundAdvantages.value
+    .map(key => allAdvantages.find(adv => adv.key === key))
+    .filter(adv => adv !== undefined) as Advantage[];
+});
+
+// 獲取已購買優勢的完整資訊
+const purchasedAdvantagesDetails = computed(() => {
+  return purchasedAdvantages.value
+    .map(adv => allAdvantages.find(a => a.key === adv.key))
+    .filter(adv => adv !== undefined) as Advantage[];
+});
+
 // 根據成本篩選優勢
 const filteredAdvantages = computed(() => {
   if (selectedCostFilter.value === null) {
@@ -909,6 +984,13 @@ const backgrounds = computed(() => {
 // 載入已保存的角色資料
 onMounted(() => {
   characterStore.loadFromLocalStorage();
+  
+  // 清除所有非背景優勢（重新進入創角流程時）
+  // 保留背景優勢，移除所有購買的優勢
+  const backgroundAdvKeys = creation.backgroundAdvantages.value;
+  characterStore.advantages = characterStore.advantages.filter(adv => 
+    backgroundAdvKeys.includes(adv.key)
+  );
 });
 
 const selectedNation = computed(() => {

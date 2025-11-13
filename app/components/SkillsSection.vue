@@ -32,7 +32,7 @@
               @click="setSkillValue(skill.key, n - 1)"
               :class="[
                 'w-6 h-6 rounded-full border-2 transition-all',
-                (n - 1) <= characterStore.skills[skill.key as keyof typeof characterStore.skills]
+                (n - 1) < characterStore.skills[skill.key as keyof typeof characterStore.skills]
                   ? 'bg-red-900 border-red-900'
                   : 'bg-white border-gray-400 hover:border-red-700'
               ]"
