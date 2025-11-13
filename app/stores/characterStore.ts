@@ -42,14 +42,14 @@ export interface CharacterData {
   // 阿爾克那
   virtue: {
     arcanaKey: string;
-    virtueKey: string;
     name: string;
+    description: string;
   } | null;
   
   hubris: {
     arcanaKey: string;
-    hubrisKey: string;
     name: string;
+    description: string;
   } | null;
 
   // 背景故事
@@ -162,13 +162,13 @@ export const useCharacterStore = defineStore('character', {
     },
 
     // 設定美德
-    setVirtue(arcanaKey: string, virtueKey: string, name: string) {
-      this.virtue = { arcanaKey, virtueKey, name };
+    setVirtue(arcanaKey: string, name: string, description: string) {
+      this.virtue = { arcanaKey, name, description };
     },
 
     // 設定傲性
-    setHubris(arcanaKey: string, hubrisKey: string, name: string) {
-      this.hubris = { arcanaKey, hubrisKey, name };
+    setHubris(arcanaKey: string, name: string, description: string) {
+      this.hubris = { arcanaKey, name, description };
     },
 
     // 新增背景
