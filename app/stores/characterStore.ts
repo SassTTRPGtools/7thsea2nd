@@ -53,10 +53,16 @@ export interface CharacterData {
   } | null;
 
   // 背景故事
-  backgrounds: string[];
+  backgrounds: Array<{
+    key: string;
+    name: string;
+  }>;
 
   // 優勢
-  advantages: string[];
+  advantages: Array<{
+    key: string;
+    name: string;
+  }>;
 
   // 英雄故事
   stories: Array<{
@@ -172,31 +178,29 @@ export const useCharacterStore = defineStore('character', {
     },
 
     // 新增背景
-    addBackground(background: string) {
-      if (!this.backgrounds.includes(background)) {
-        this.backgrounds.push(background);
+    addBackground(key: string, name: string) {
+      if (!this.backgrounds.find(bg => bg.key === key)) {
+        this.backgrounds.push({ key, name });
       }
     },
 
     // 移除背景
-    removeBackground(background: string) {
-      const index = this.backgrounds.indexOf(background);
-      if (index > -1) {
+    removeBackground(index: number) {
+      if (index >= 0 && index < this.backgrounds.length) {
         this.backgrounds.splice(index, 1);
       }
     },
 
     // 新增優勢
-    addAdvantage(advantage: string) {
-      if (!this.advantages.includes(advantage)) {
-        this.advantages.push(advantage);
+    addAdvantage(key: string, name: string) {
+      if (!this.advantages.find(adv => adv.key === key)) {
+        this.advantages.push({ key, name });
       }
     },
 
     // 移除優勢
-    removeAdvantage(advantage: string) {
-      const index = this.advantages.indexOf(advantage);
-      if (index > -1) {
+    removeAdvantage(index: number) {
+      if (index >= 0 && index < this.advantages.length) {
         this.advantages.splice(index, 1);
       }
     },
