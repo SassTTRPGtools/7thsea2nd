@@ -1,19 +1,19 @@
 <template>
   <div class="bg-stone-50 border-4 border-red-900 rounded-sm shadow-lg">
     <div class="bg-red-900 text-white text-center py-2 px-4">
-      <h2 class="text-lg font-bold uppercase tracking-wider">Death Spiral</h2>
+      <h2 class="text-lg font-bold uppercase tracking-wider">死亡螺旋</h2>
     </div>
     
     <div class="p-4">
       <!-- 傷勢等級說明 -->
       <div class="grid grid-cols-2 gap-2 mb-4 text-xs">
         <div class="space-y-1">
-          <div class="font-semibold text-gray-700">1: +1 Bonus Die to all Risks</div>
-          <div class="font-semibold text-gray-700">2: Villains gain +2 Bonus Dice</div>
+          <div class="font-semibold text-gray-700">1: 所有檢定 +1 額外骰數</div>
+          <div class="font-semibold text-gray-700">2: 反派 +2 額外骰數</div>
         </div>
         <div class="space-y-1">
-          <div class="font-semibold text-gray-700">3: Your 10s explode (+1 die)</div>
-          <div class="font-semibold text-gray-700">4: You become Helpless</div>
+          <div class="font-semibold text-gray-700">3: 啟動 10 爆炸骰 (額外骰一顆)</div>
+          <div class="font-semibold text-gray-700">4: 你陷入無助</div>
         </div>
       </div>
 
