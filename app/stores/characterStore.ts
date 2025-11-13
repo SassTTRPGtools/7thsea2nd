@@ -78,8 +78,8 @@ export interface CharacterData {
 
   // 死亡螺旋 (Death Spiral)
   deathSpiral: {
-    currentWounds: number; // 當前傷勢數量 (0-4)
-    dramaticWounds: boolean[]; // 20 個戲劇傷勢圓圈狀態
+    wounds: boolean[]; // 20 個傷勢圓圈（場景結束時清空）
+    severeWounds: number; // 劇烈傷勢數量 (0-4，場景結束後保留)
   };
 }
 
@@ -132,8 +132,8 @@ export const useCharacterStore = defineStore('character', {
     stories: [],
 
     deathSpiral: {
-      currentWounds: 0,
-      dramaticWounds: Array(20).fill(false)
+      wounds: Array(20).fill(false),
+      severeWounds: 0
     }
   }),
 
@@ -191,14 +191,35 @@ export const useCharacterStore = defineStore('character', {
       return 5 - this.spentAdvantagePoints;
     },
 
-    // 檢查是否無助 (4 次戲劇傷勢)
+    // 檢查是否無助 (4 個劇烈傷勢)
     isHelpless: (state) => {
-      return state.deathSpiral.currentWounds >= 4;
+      return state.deathSpiral.severeWounds >= 4;
     },
 
-    // 計算已標記的戲劇傷勢數量
-    markedDramaticWounds: (state) => {
-      return state.deathSpiral.dramaticWounds.filter(w => w).length;
+    // 計算已標記的傷勢數量（當前場景）
+    markedWounds: (state) => {
+      return state.deathSpiral.wounds.filter(w => w).length;
+    },
+
+    // 計算總傷勢（劇烈傷勢 × 5 + 當前傷勢）
+    totalWounds: (state) => {
+      const currentWounds = state.deathSpiral.wounds.filter(w => w).length;
+      return state.deathSpiral.severeWounds * 5 + currentWounds;
+    },
+
+    // 計算顯示用的傷勢陣列（包含劇烈傷勢的填補效果）
+    displayWounds: (state) => {
+      const display = [...state.deathSpiral.wounds];
+      const severeCount = state.deathSpiral.severeWounds;
+      
+      // 劇烈傷勢填補關鍵位置：第 5, 10, 15, 20 個圓圈
+      // 只有當該位置沒有被當前傷勢標記時，才用劇烈傷勢填補
+      if (severeCount >= 1 && !display[4]) display[4] = true;  // 第 5 個
+      if (severeCount >= 2 && !display[9]) display[9] = true;  // 第 10 個
+      if (severeCount >= 3 && !display[14]) display[14] = true; // 第 15 個
+      if (severeCount >= 4 && !display[19]) display[19] = true; // 第 20 個
+      
+      return display;
     },
 
     // 檢查角色創建是否完成
@@ -317,20 +338,52 @@ export const useCharacterStore = defineStore('character', {
       }
     },
 
-    // 設定當前傷勢
-    setCurrentWounds(wounds: number) {
-      if (wounds >= 0 && wounds <= 4) {
-        this.deathSpiral.currentWounds = wounds;
+    // 切換傷勢圓圈（當前場景的傷勢）
+    toggleWound(index: number) {
+      if (index >= 0 && index < 20) {
+        this.deathSpiral.wounds[index] = !this.deathSpiral.wounds[index];
+        
+        // 自動計算劇烈傷勢：每 5 個傷勢 = 1 個劇烈傷勢
+        const currentWoundCount = this.deathSpiral.wounds.filter(w => w).length;
+        const calculatedSevere = Math.floor(currentWoundCount / 5);
+        
+        // 如果計算出的劇烈傷勢比當前多，自動增加
+        if (calculatedSevere > this.deathSpiral.severeWounds) {
+          this.deathSpiral.severeWounds = calculatedSevere;
+        }
+        
         this.saveToLocalStorage();
       }
     },
 
-    // 切換戲劇傷勢圓圈
-    toggleDramaticWound(index: number) {
-      if (index >= 0 && index < 20) {
-        this.deathSpiral.dramaticWounds[index] = !this.deathSpiral.dramaticWounds[index];
+    // 增加劇烈傷勢
+    addSevereWound() {
+      if (this.deathSpiral.severeWounds < 4) {
+        this.deathSpiral.severeWounds++;
         this.saveToLocalStorage();
       }
+    },
+
+    // 減少劇烈傷勢
+    removeSevereWound() {
+      if (this.deathSpiral.severeWounds > 0) {
+        this.deathSpiral.severeWounds--;
+        this.saveToLocalStorage();
+      }
+    },
+
+    // 清空傷勢（場景結束時使用，保留劇烈傷勢）
+    clearWounds() {
+      // 只清空當前場景的傷勢，劇烈傷勢保持不變
+      this.deathSpiral.wounds = Array(20).fill(false);
+      this.saveToLocalStorage();
+    },
+
+    // 清除劇烈傷勢（劇集結束時使用）
+    clearSevereWounds() {
+      this.deathSpiral.severeWounds = 0;
+      this.deathSpiral.wounds = Array(20).fill(false);
+      this.saveToLocalStorage();
     },
 
     // 儲存到 localStorage

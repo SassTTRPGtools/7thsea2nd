@@ -5,50 +5,50 @@
     </div>
     
     <div class="p-4">
-      <!-- 傷勢等級說明 -->
+      <!-- 劇烈傷勢效果說明 -->
       <div class="grid grid-cols-2 gap-2 mb-4 text-xs">
         <div class="space-y-1">
           <div 
             :class="[
               'font-semibold p-1 rounded transition-all',
-              characterStore.markedDramaticWounds >= 5 
+              characterStore.deathSpiral.severeWounds >= 1 
                 ? 'bg-yellow-200 text-yellow-900 border-2 border-yellow-600' 
                 : 'text-gray-700'
             ]"
           >
-            5+ 傷勢: 所有檢定 +1 額外骰數
+            1 劇烈傷: 所有檢定 +1 額外骰數
           </div>
           <div 
             :class="[
               'font-semibold p-1 rounded transition-all',
-              characterStore.markedDramaticWounds >= 10 
+              characterStore.deathSpiral.severeWounds >= 2 
                 ? 'bg-orange-200 text-orange-900 border-2 border-orange-600' 
                 : 'text-gray-700'
             ]"
           >
-            10+ 傷勢: 反派 +2 額外骰數
+            2 劇烈傷: 反派 +2 額外骰數
           </div>
         </div>
         <div class="space-y-1">
           <div 
             :class="[
               'font-semibold p-1 rounded transition-all',
-              characterStore.markedDramaticWounds >= 15 
+              characterStore.deathSpiral.severeWounds >= 3 
                 ? 'bg-red-200 text-red-900 border-2 border-red-600' 
                 : 'text-gray-700'
             ]"
           >
-            15+ 傷勢: 啟動 10 爆炸骰 (額外骰一顆)
+            3 劇烈傷: 10 爆炸骰 (額外骰一顆)
           </div>
           <div 
             :class="[
               'font-semibold p-1 rounded transition-all',
-              characterStore.markedDramaticWounds >= 20 
+              characterStore.deathSpiral.severeWounds >= 4 
                 ? 'bg-red-700 text-white border-2 border-red-900 animate-pulse' 
                 : 'text-gray-700'
             ]"
           >
-            20 傷勢: 你陷入無助
+            4 劇烈傷: 你陷入無助
           </div>
         </div>
       </div>
@@ -66,17 +66,74 @@
             @click="handleCircleClick(n - 1)"
             :class="[
               'absolute w-6 h-6 wound-mark rounded-full',
-              getWoundLevelClass(n)
+              getWoundLevelClass(n),
+              isSevereWoundPosition(n) ? 'severe-position' : ''
             ]"
             :style="getCirclePosition(n - 1)"
           >
-            <span v-if="characterStore.deathSpiral.dramaticWounds[n - 1]" class="slash-mark"></span>
+            <span v-if="characterStore.displayWounds[n - 1]" 
+                  :class="[
+                    'slash-mark',
+                    isSevereWoundFilled(n - 1) ? 'severe-filled' : ''
+                  ]"></span>
           </button>
         </div>
       </div>
       <div v-if="characterStore.isHelpless" 
            class="mt-3 text-center text-red-700 font-bold text-sm animate-pulse">
         ⚠️ 角色已無助！
+      </div>
+
+      <!-- 劇烈傷勢控制 -->
+      <div class="mt-4 border-t-2 border-red-300 pt-3">
+        <div class="mb-3">
+          <div class="text-sm font-bold text-red-900 mb-2">劇烈傷勢調整</div>
+          <div class="flex items-center gap-2">
+            <button
+              @click="characterStore.removeSevereWound()"
+              :disabled="characterStore.deathSpiral.severeWounds === 0"
+              class="px-3 py-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded transition-colors"
+            >
+              −
+            </button>
+            <div class="flex-1 text-center">
+              <span class="text-2xl font-bold text-red-900">{{ characterStore.deathSpiral.severeWounds }}</span>
+              <span class="text-sm text-gray-600"> / 4</span>
+            </div>
+            <button
+              @click="characterStore.addSevereWound()"
+              :disabled="characterStore.deathSpiral.severeWounds === 4"
+              class="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded transition-colors"
+            >
+              +
+            </button>
+          </div>
+          <div class="text-xs text-gray-600 text-center mt-1">
+            每承受 5 個傷勢可增加 1 個劇烈傷勢
+          </div>
+        </div>
+        
+        <div class="flex gap-2">
+          <button
+            @click="handleClearWounds"
+            class="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
+            title="清空所有當前傷勢，但保留劇烈傷勢（場景結束時使用）"
+          >
+            🏥 清空傷勢
+          </button>
+          <button
+            @click="handleClearSevereWounds"
+            class="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
+            title="清除所有劇烈傷勢和傷勢（劇集結束時使用）"
+          >
+            ✨ 清除劇烈傷勢
+          </button>
+        </div>
+        
+        <div class="mt-2 text-xs text-gray-600 space-y-1">
+          <div>• 場景結束：清空傷勢（保留劇烈傷勢）</div>
+          <div>• 劇集結束：清除劇烈傷勢（完全痊癒）</div>
+        </div>
       </div>
     </div>
   </div>
@@ -88,21 +145,32 @@ import { getAssetUrl } from '~/composables/useAssetUrl';
 
 const characterStore = useCharacterStore();
 
-const setWounds = (level: number) => {
-  characterStore.setCurrentWounds(level);
+// 判斷是否為劇烈傷勢位置（第 5, 10, 15, 20 個）
+const isSevereWoundPosition = (n: number) => {
+  return n % 5 === 0 && n > 0;
 };
 
-// 根據傷勢圓圈編號返回對應的高亮樣式
+// 判斷該位置是否由劇烈傷勢填補（而非當前傷勢）
+const isSevereWoundFilled = (index: number) => {
+  // 該位置有顯示，但當前傷勢陣列中沒有標記，說明是劇烈傷勢填補的
+  return characterStore.displayWounds[index] && !characterStore.deathSpiral.wounds[index];
+};
+
+// 根據傷勢圓圈編號返回對應的高亮樣式（每 5 個為一個劇烈傷勢等級）
 const getWoundLevelClass = (n: number) => {
-  // 只有在圓圈是 5, 10, 15, 20 時才高亮
-  if (n === 5) {
-    return 'border-2 border-yellow-500 bg-yellow-100';
-  } else if (n === 10) {
-    return 'border-2 border-orange-500 bg-orange-100';
-  } else if (n === 15) {
-    return 'border-2 border-red-500 bg-red-100';
-  } else if (n === 20) {
-    return 'border-2 border-red-700 bg-red-200';
+  const severeLevel = Math.floor(n / 5); // 0-3 對應 1-4 劇烈傷勢
+  
+  // 每 5 個傷勢的最後一個圓圈（第 5, 10, 15, 20 個）使用特殊樣式
+  if (n % 5 === 0 && n > 0) {
+    if (severeLevel === 1) {
+      return 'border-2 border-yellow-500 bg-yellow-100';
+    } else if (severeLevel === 2) {
+      return 'border-2 border-orange-500 bg-orange-100';
+    } else if (severeLevel === 3) {
+      return 'border-2 border-red-500 bg-red-100';
+    } else if (severeLevel === 4) {
+      return 'border-2 border-red-700 bg-red-200';
+    }
   }
   return 'border-2 border-blue-500 bg-blue-200 bg-opacity-50';
 };
@@ -155,7 +223,7 @@ const getCirclePosition = (index: number) => {
 // 點選第 N 個時，0 到 N 都會被選中
 // 點選比當前更前面的，則會清除後面的選擇
 const handleCircleClick = (index: number) => {
-  const wounds = characterStore.deathSpiral.dramaticWounds;
+  const wounds = characterStore.deathSpiral.wounds;
   
   // 如果點擊的這個圓圈已經被選中
   if (wounds[index]) {
@@ -166,7 +234,7 @@ const handleCircleClick = (index: number) => {
       // 如果有更後面的被選中，清除 index+1 之後的所有選擇
       for (let i = index + 1; i < 20; i++) {
         if (wounds[i]) {
-          characterStore.toggleDramaticWound(i);
+          characterStore.toggleWound(i);
         }
       }
     } else {
@@ -182,7 +250,7 @@ const handleCircleClick = (index: number) => {
       // 取消從 lastSelected 到 index 的選擇
       for (let i = lastSelected; i <= index; i++) {
         if (wounds[i]) {
-          characterStore.toggleDramaticWound(i);
+          characterStore.toggleWound(i);
         }
       }
     }
@@ -190,9 +258,23 @@ const handleCircleClick = (index: number) => {
     // 如果點擊的圓圈還沒被選中，選中從 0 到 index 的所有圓圈
     for (let i = 0; i <= index; i++) {
       if (!wounds[i]) {
-        characterStore.toggleDramaticWound(i);
+        characterStore.toggleWound(i);
       }
     }
+  }
+};
+
+// 清空傷勢（場景結束）
+const handleClearWounds = () => {
+  if (confirm('確定要清空傷勢嗎？\n\n這會清除所有當前傷勢（20個圓圈），但保留劇烈傷勢（適用於場景結束時）。')) {
+    characterStore.clearWounds();
+  }
+};
+
+// 清除劇烈傷勢（劇集結束）
+const handleClearSevereWounds = () => {
+  if (confirm('確定要清除劇烈傷勢嗎？\n\n這會清除所有劇烈傷勢和當前傷勢，角色完全痊癒（適用於劇集結束時）。')) {
+    characterStore.clearSevereWounds();
   }
 };
 </script>
@@ -257,5 +339,25 @@ const handleCircleClick = (index: number) => {
   to {
     opacity: 1;
   }
+}
+
+/* 劇烈傷勢位置的特殊標記 */
+.severe-position {
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.3);
+}
+
+/* 劇烈傷勢填補的刀劃（使用金色表示持久傷害）*/
+.severe-filled::before,
+.severe-filled::after {
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(180, 83, 9, 0.9) 20%,
+    rgba(217, 119, 6, 1) 50%,
+    rgba(180, 83, 9, 0.9) 80%,
+    transparent 100%
+  );
+  box-shadow: 
+    0 0 3px rgba(217, 119, 6, 0.9),
+    0 0 6px rgba(180, 83, 9, 0.6);
 }
 </style>
