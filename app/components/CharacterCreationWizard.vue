@@ -753,7 +753,7 @@
         <div v-else-if="currentStep === 6">
           <h2 class="text-xl font-bold mb-4 text-red-900">步驟 6: 選擇阿爾克那</h2>
           <p class="text-gray-700 mb-4">
-            每位英雄都有其命運。選擇一個<span class="font-bold text-red-700">美德</span>與一個<span class="font-bold text-red-700">傲性</span>：你的正位牌與交叉牌。
+            每位英雄都有其命運。選擇一個<span class="font-bold text-red-700">美德</span>與一個<span class="font-bold text-red-700">傲性</span>：你的正位與逆位牌。
           </p>
 
           <!-- 隨機選擇按鈕 -->

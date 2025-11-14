@@ -450,7 +450,7 @@ export const backgrounds: Record<string, Background> = {
     key: 'mirabilis',
     name: '奇蹟教士',
     nameEn: 'Mirabilis／Priest',
-    description: '你是教宗教會的高等學者,隸屬奇蹟教團(Ordo Doctorem Mirabilis)。',
+    description: '你是教宗教會的高等學者，隸屬奇蹟教團。',
     quirk: '當你以身作則展現教宗教會的慈悲與溫暖時，獲得１點英雄點。',
     advantages: ['ordained', 'sparkOfGenius'],
     skills: ['convince', 'empathy', 'perform', 'ride', 'scholarship'],
@@ -460,9 +460,9 @@ export const backgrounds: Record<string, Background> = {
   // 艾森背景 (Eisen Backgrounds)
   hexe: {
     key: 'hexe',
-    name: '赫森術師',
+    name: '煉膏士',
     nameEn: 'Hexe',
-    description: '你精通赫森術，那是與亡者相關的黑暗巫術。',
+    description: '你精通穢膏術，那是與亡者相關的黑暗巫術。',
     quirk: '當你特意確保死者不再復起時，獲得１點英雄點。',
     advantages: ['sorcery', 'sorcery', 'castIronStomach'],
     skills: ['athletics', 'intimidate', 'notice', 'tempt', 'weaponry'],
@@ -785,7 +785,7 @@ export const backgroundNames: Record<string, string> = {
   diestro: '劍術宗師',
   mirabilis: '奇蹟教士',
   // 艾森
-  hexe: '赫森術師',
+  hexe: '煉膏士',
   krieger: '戰士',
   ungetumjager: '獵魔人',
   vitalienbruder: '維塔連兄弟',
